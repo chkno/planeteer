@@ -113,372 +113,372 @@
 		{
 			"Name": "Earth",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 100 },
-				{ "Name": "Device Of Cloakings",          "Value": 100 },
-				{ "Name": "AntiCloak Scanners",           "Value": 100 },
-				{ "Name": "Big Cargo Spaces",             "Value": 100 },
-				{ "Name": "Medical Units",                "Value": 100 },
-				{ "Name": "Heating Units",                "Value": 100 },
-				{ "Name": "Ice Units",                    "Value": 100 },
-				{ "Name": "Ground Weapons",               "Value": 100 },
-				{ "Name": "Reactor Units",                "Value": 100 },
-				{ "Name": "Novelty Packs",                "Value": 100 },
-				{ "Name": "Tree Growth Kits",             "Value": 100 },
-				{ "Name": "Jewels",                       "Value": 100 },
-				{ "Name": "Plastic Trinkets",             "Value": 100 },
-				{ "Name": "Clothes Bundles",              "Value": 100 },
-				{ "Name": "Fighter Drones",               "Value": 100 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            100,
+				"Device Of Cloakings":        100,
+				"AntiCloak Scanners":         100,
+				"Big Cargo Spaces":           100,
+				"Medical Units":              100,
+				"Heating Units":              100,
+				"Ice Units":                  100,
+				"Ground Weapons":             100,
+				"Reactor Units":              100,
+				"Novelty Packs":              100,
+				"Tree Growth Kits":           100,
+				"Jewels":                     100,
+				"Plastic Trinkets":           100,
+				"Clothes Bundles":            100,
+				"Fighter Drones":             100
+			}
 		},
 		{
 			"Name": "Hothor",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 176 },
-				{ "Name": "Device Of Cloakings",          "Value": 112 },
-				{ "Name": "Medical Units",                "Value": 134 },
-				{ "Name": "Heating Units",                "Value": 600 },
-				{ "Name": "Ice Units",                    "Value": 12 },
-				{ "Name": "Ground Weapons",               "Value": 123 },
-				{ "Name": "Novelty Packs",                "Value": 156 },
-				{ "Name": "Plastic Trinkets",             "Value": 98 },
-				{ "Name": "Clothes Bundles",              "Value": 290 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            176,
+				"Device Of Cloakings":        112,
+				"Medical Units":              134,
+				"Heating Units":              600,
+				"Ice Units":                  12,
+				"Ground Weapons":             123,
+				"Novelty Packs":              156,
+				"Plastic Trinkets":           98,
+				"Clothes Bundles":            290
+			}
 		},
 		{
 			"Name": "Volcana",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Device Of Cloakings",          "Value": 187 },
-				{ "Name": "Medical Units",                "Value": 143 },
-				{ "Name": "Heating Units",                "Value": 18 },
-				{ "Name": "Ice Units",                    "Value": 1232 },
-				{ "Name": "Ground Weapons",               "Value": 98 },
-				{ "Name": "Tree Growth Kits",             "Value": 345 },
-				{ "Name": "Clothes Bundles",              "Value": 57 }
-			]
+			"RelativePrices": {
+				"Device Of Cloakings":        187,
+				"Medical Units":              143,
+				"Heating Units":              18,
+				"Ice Units":                  1232,
+				"Ground Weapons":             98,
+				"Tree Growth Kits":           345,
+				"Clothes Bundles":            57
+			}
 		},
 		{
 			"Name": "Metallica",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 67 },
-				{ "Name": "Device Of Cloakings",          "Value": 78 },
-				{ "Name": "AntiCloak Scanners",           "Value": 87 },
-				{ "Name": "Ground Weapons",               "Value": 63 },
-				{ "Name": "Tree Growth Kits",             "Value": 576 },
-				{ "Name": "Fighter Drones",               "Value": 322 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            67,
+				"Device Of Cloakings":        78,
+				"AntiCloak Scanners":         87,
+				"Ground Weapons":             63,
+				"Tree Growth Kits":           576,
+				"Fighter Drones":             322
+			}
 		},
 		{
 			"Name": "Medoca",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 23 },
-				{ "Name": "Ice Units",                    "Value": 124 },
-				{ "Name": "Novelty Packs",                "Value": 187 },
-				{ "Name": "Tree Growth Kits",             "Value": 467 },
-				{ "Name": "Clothes Bundles",              "Value": 54 }
-			]
+			"RelativePrices": {
+				"Medical Units":              23,
+				"Ice Units":                  124,
+				"Novelty Packs":              187,
+				"Tree Growth Kits":           467,
+				"Clothes Bundles":            54
+			}
 		},
 		{
 			"Name": "Gojuon",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Heating Units",                "Value": 99 },
-				{ "Name": "Ice Units",                    "Value": 1187 },
-				{ "Name": "Ground Weapons",               "Value": 87 },
-				{ "Name": "Novelty Packs",                "Value": 4384 },
-				{ "Name": "Tree Growth Kits",             "Value": 89 },
-				{ "Name": "Plastic Trinkets",             "Value": 12 },
-				{ "Name": "Clothes Bundles",              "Value": 89 }
-			]
+			"RelativePrices": {
+				"Heating Units":              99,
+				"Ice Units":                  1187,
+				"Ground Weapons":             87,
+				"Novelty Packs":              4384,
+				"Tree Growth Kits":           89,
+				"Plastic Trinkets":           12,
+				"Clothes Bundles":            89
+			}
 		},
 		{
 			"Name": "Desha Rockna",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 134 },
-				{ "Name": "Heating Units",                "Value": 124 },
-				{ "Name": "Ice Units",                    "Value": 167 },
-				{ "Name": "Ground Weapons",               "Value": 89 },
-				{ "Name": "Reactor Units",                "Value": 97 },
-				{ "Name": "Tree Growth Kits",             "Value": 674 },
-				{ "Name": "Jewels",                       "Value": 68 },
-				{ "Name": "Clothes Bundles",              "Value": 87 }
-			]
+			"RelativePrices": {
+				"Medical Units":              134,
+				"Heating Units":              124,
+				"Ice Units":                  167,
+				"Ground Weapons":             89,
+				"Reactor Units":              97,
+				"Tree Growth Kits":           674,
+				"Jewels":                     68,
+				"Clothes Bundles":            87
+			}
 		},
 		{
 			"Name": "Dogafetch",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 123 },
-				{ "Name": "Device Of Cloakings",          "Value": 67 },
-				{ "Name": "Big Cargo Spaces",             "Value": 134 },
-				{ "Name": "Medical Units",                "Value": 123 },
-				{ "Name": "Ice Units",                    "Value": 234 },
-				{ "Name": "Ground Weapons",               "Value": 98 },
-				{ "Name": "Novelty Packs",                "Value": 3750 },
-				{ "Name": "Tree Growth Kits",             "Value": 87 },
-				{ "Name": "Plastic Trinkets",             "Value": 1760 },
-				{ "Name": "Clothes Bundles",              "Value": 23 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            123,
+				"Device Of Cloakings":        67,
+				"Big Cargo Spaces":           134,
+				"Medical Units":              123,
+				"Ice Units":                  234,
+				"Ground Weapons":             98,
+				"Novelty Packs":              3750,
+				"Tree Growth Kits":           87,
+				"Plastic Trinkets":           1760,
+				"Clothes Bundles":            23
+			}
 		},
 		{
 			"Name": "Eden",
 			"BeaconOn": false,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 100 },
-				{ "Name": "Tree Growth Kits",             "Value": 11 },
-				{ "Name": "Eden Warp Units",              "Value": 100 }
-			]
+			"RelativePrices": {
+				"Medical Units":              100,
+				"Tree Growth Kits":           11,
+				"Eden Warp Units":            100
+			}
 		},
 		{
 			"Name": "Richiana",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Device Of Cloakings",          "Value": 157 },
-				{ "Name": "Medical Units",                "Value": 654 },
-				{ "Name": "Heating Units",                "Value": 564 },
-				{ "Name": "Ice Units",                    "Value": 2538 },
-				{ "Name": "Ground Weapons",               "Value": 754 },
-				{ "Name": "Novelty Packs",                "Value": 1277 },
-				{ "Name": "Tree Growth Kits",             "Value": 498 },
-				{ "Name": "Jewels",                       "Value": 323 },
-				{ "Name": "Plastic Trinkets",             "Value": 2783 },
-				{ "Name": "Clothes Bundles",              "Value": 465 }
-			]
+			"RelativePrices": {
+				"Device Of Cloakings":        157,
+				"Medical Units":              654,
+				"Heating Units":              564,
+				"Ice Units":                  2538,
+				"Ground Weapons":             754,
+				"Novelty Packs":              1277,
+				"Tree Growth Kits":           498,
+				"Jewels":                     323,
+				"Plastic Trinkets":           2783,
+				"Clothes Bundles":            465
+			}
 		},
 		{
 			"Name": "Tribonia",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 187 },
-				{ "Name": "Heating Units",                "Value": 345 },
-				{ "Name": "Ground Weapons",               "Value": 1953 },
-				{ "Name": "Novelty Packs",                "Value": 5736 },
-				{ "Name": "Tree Growth Kits",             "Value": 76 },
-				{ "Name": "Jewels",                       "Value": 96 },
-				{ "Name": "Plastic Trinkets",             "Value": 4 },
-				{ "Name": "Clothes Bundles",              "Value": 898 }
-			]
+			"RelativePrices": {
+				"Medical Units":              187,
+				"Heating Units":              345,
+				"Ground Weapons":             1953,
+				"Novelty Packs":              5736,
+				"Tree Growth Kits":           76,
+				"Jewels":                     96,
+				"Plastic Trinkets":           4,
+				"Clothes Bundles":            898
+			}
 		},
 		{
 			"Name": "Dune",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 143 },
-				{ "Name": "Device Of Cloakings",          "Value": 176 },
-				{ "Name": "Medical Units",                "Value": 198 },
-				{ "Name": "Heating Units",                "Value": 100 },
-				{ "Name": "Ice Units",                    "Value": 876 },
-				{ "Name": "Ground Weapons",               "Value": 122 },
-				{ "Name": "Reactor Units",                "Value": 85 },
-				{ "Name": "Tree Growth Kits",             "Value": 890 },
-				{ "Name": "Jewels",                       "Value": 88 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            143,
+				"Device Of Cloakings":        176,
+				"Medical Units":              198,
+				"Heating Units":              100,
+				"Ice Units":                  876,
+				"Ground Weapons":             122,
+				"Reactor Units":              85,
+				"Tree Growth Kits":           890,
+				"Jewels":                     88
+			}
 		},
 		{
 			"Name": "Plague",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 239 },
-				{ "Name": "Heating Units",                "Value": 88 },
-				{ "Name": "Novelty Packs",                "Value": 3321 },
-				{ "Name": "Tree Growth Kits",             "Value": 87 },
-				{ "Name": "Jewels",                       "Value": 100 },
-				{ "Name": "Plastic Trinkets",             "Value": 133 },
-				{ "Name": "Clothes Bundles",              "Value": 90 }
-			]
+			"RelativePrices": {
+				"Medical Units":              239,
+				"Heating Units":              88,
+				"Novelty Packs":              3321,
+				"Tree Growth Kits":           87,
+				"Jewels":                     100,
+				"Plastic Trinkets":           133,
+				"Clothes Bundles":            90
+			}
 		},
 		{
 			"Name": "Norhaven",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 100 },
-				{ "Name": "Device Of Cloakings",          "Value": 88 },
-				{ "Name": "AntiCloak Scanners",           "Value": 89 },
-				{ "Name": "Big Cargo Spaces",             "Value": 100 },
-				{ "Name": "Medical Units",                "Value": 132 },
-				{ "Name": "Heating Units",                "Value": 122 },
-				{ "Name": "Ice Units",                    "Value": 95 },
-				{ "Name": "Ground Weapons",               "Value": 88 },
-				{ "Name": "Reactor Units",                "Value": 100 },
-				{ "Name": "Novelty Packs",                "Value": 60 },
-				{ "Name": "Tree Growth Kits",             "Value": 99 },
-				{ "Name": "Jewels",                       "Value": 233 },
-				{ "Name": "Plastic Trinkets",             "Value": 87 },
-				{ "Name": "Clothes Bundles",              "Value": 100 },
-				{ "Name": "Fighter Drones",               "Value": 106 },
-				{ "Name": "Onboard Printing Kits",        "Value": 100 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            100,
+				"Device Of Cloakings":        88,
+				"AntiCloak Scanners":         89,
+				"Big Cargo Spaces":           100,
+				"Medical Units":              132,
+				"Heating Units":              122,
+				"Ice Units":                  95,
+				"Ground Weapons":             88,
+				"Reactor Units":              100,
+				"Novelty Packs":              60,
+				"Tree Growth Kits":           99,
+				"Jewels":                     233,
+				"Plastic Trinkets":           87,
+				"Clothes Bundles":            100,
+				"Fighter Drones":             106,
+				"Onboard Printing Kits":      100
+			}
 		},
 		{
 			"Name": "Loony",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 500 },
-				{ "Name": "Device Of Cloakings",          "Value": 55 },
-				{ "Name": "AntiCloak Scanners",           "Value": 107 },
-				{ "Name": "Medical Units",                "Value": 1123 },
-				{ "Name": "Heating Units",                "Value": 100 },
-				{ "Name": "Ice Units",                    "Value": 2324 },
-				{ "Name": "Novelty Packs",                "Value": 1942 },
-				{ "Name": "Plastic Trinkets",             "Value": 2002 },
-				{ "Name": "Clothes Bundles",              "Value": 67 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            500,
+				"Device Of Cloakings":        55,
+				"AntiCloak Scanners":         107,
+				"Medical Units":              1123,
+				"Heating Units":              100,
+				"Ice Units":                  2324,
+				"Novelty Packs":              1942,
+				"Plastic Trinkets":           2002,
+				"Clothes Bundles":            67
+			}
 		},
 		{
 			"Name": "WeaponWorld",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 100 },
-				{ "Name": "Device Of Cloakings",          "Value": 98 },
-				{ "Name": "AntiCloak Scanners",           "Value": 88 },
-				{ "Name": "Medical Units",                "Value": 100 },
-				{ "Name": "Heating Units",                "Value": 100 },
-				{ "Name": "Ice Units",                    "Value": 121 },
-				{ "Name": "Ground Weapons",               "Value": 3 },
-				{ "Name": "Jewels",                       "Value": 287 },
-				{ "Name": "Plastic Trinkets",             "Value": 112 },
-				{ "Name": "Clothes Bundles",              "Value": 100 },
-				{ "Name": "Fighter Drones",               "Value": 96 },
-				{ "Name": "Utopia Planetary Defenses",    "Value": 100 },
-				{ "Name": "Onboard Printing Kits",        "Value": 100 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            100,
+				"Device Of Cloakings":        98,
+				"AntiCloak Scanners":         88,
+				"Medical Units":              100,
+				"Heating Units":              100,
+				"Ice Units":                  121,
+				"Ground Weapons":             3,
+				"Jewels":                     287,
+				"Plastic Trinkets":           112,
+				"Clothes Bundles":            100,
+				"Fighter Drones":             96,
+				"Utopia Planetary Defenses":  100,
+				"Onboard Printing Kits":      100
+			}
 		},
 		{
 			"Name": "Zoolie",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 78 },
-				{ "Name": "Heating Units",                "Value": 344 },
-				{ "Name": "Ice Units",                    "Value": 2500 },
-				{ "Name": "Novelty Packs",                "Value": 365 },
-				{ "Name": "Tree Growth Kits",             "Value": 980 },
-				{ "Name": "Plastic Trinkets",             "Value": 100 },
-				{ "Name": "Clothes Bundles",              "Value": 100 }
-			]
+			"RelativePrices": {
+				"Medical Units":              78,
+				"Heating Units":              344,
+				"Ice Units":                  2500,
+				"Novelty Packs":              365,
+				"Tree Growth Kits":           980,
+				"Plastic Trinkets":           100,
+				"Clothes Bundles":            100
+			}
 		},
 		{
 			"Name": "Baboria",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 100 },
-				{ "Name": "Heating Units",                "Value": 122 },
-				{ "Name": "Ice Units",                    "Value": 88 },
-				{ "Name": "Ground Weapons",               "Value": 233 },
-				{ "Name": "Novelty Packs",                "Value": 544 },
-				{ "Name": "Tree Growth Kits",             "Value": 398 },
-				{ "Name": "Jewels",                       "Value": 234 },
-				{ "Name": "Plastic Trinkets",             "Value": 4540 },
-				{ "Name": "Clothes Bundles",              "Value": 345 }
-			]
+			"RelativePrices": {
+				"Medical Units":              100,
+				"Heating Units":              122,
+				"Ice Units":                  88,
+				"Ground Weapons":             233,
+				"Novelty Packs":              544,
+				"Tree Growth Kits":           398,
+				"Jewels":                     234,
+				"Plastic Trinkets":           4540,
+				"Clothes Bundles":            345
+			}
 		},
 		{
 			"Name": "StockWorld",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Shield Batterys",              "Value": 103 },
-				{ "Name": "Device Of Cloakings",          "Value": 102 },
-				{ "Name": "AntiCloak Scanners",           "Value": 99 },
-				{ "Name": "Medical Units",                "Value": 101 },
-				{ "Name": "Heating Units",                "Value": 105 },
-				{ "Name": "Ice Units",                    "Value": 97 },
-				{ "Name": "Ground Weapons",               "Value": 95 },
-				{ "Name": "Reactor Units",                "Value": 100 },
-				{ "Name": "Novelty Packs",                "Value": 107 },
-				{ "Name": "Tree Growth Kits",             "Value": 94 },
-				{ "Name": "Jewels",                       "Value": 111 },
-				{ "Name": "Plastic Trinkets",             "Value": 110 },
-				{ "Name": "Clothes Bundles",              "Value": 98 }
-			]
+			"RelativePrices": {
+				"Shield Batterys":            103,
+				"Device Of Cloakings":        102,
+				"AntiCloak Scanners":         99,
+				"Medical Units":              101,
+				"Heating Units":              105,
+				"Ice Units":                  97,
+				"Ground Weapons":             95,
+				"Reactor Units":              100,
+				"Novelty Packs":              107,
+				"Tree Growth Kits":           94,
+				"Jewels":                     111,
+				"Plastic Trinkets":           110,
+				"Clothes Bundles":            98
+			}
 		},
 		{
 			"Name": "HugeLind Mar",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Device Of Cloakings",          "Value": 123 },
-				{ "Name": "Medical Units",                "Value": 117 },
-				{ "Name": "Heating Units",                "Value": 189 },
-				{ "Name": "Ice Units",                    "Value": 167 },
-				{ "Name": "Ground Weapons",               "Value": 1673 },
-				{ "Name": "Jewels",                       "Value": 88 },
-				{ "Name": "Clothes Bundles",              "Value": 1320 }
-			]
+			"RelativePrices": {
+				"Device Of Cloakings":        123,
+				"Medical Units":              117,
+				"Heating Units":              189,
+				"Ice Units":                  167,
+				"Ground Weapons":             1673,
+				"Jewels":                     88,
+				"Clothes Bundles":            1320
+			}
 		},
 		{
 			"Name": "Sickonia",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 1756 },
-				{ "Name": "Heating Units",                "Value": 100 },
-				{ "Name": "Ice Units",                    "Value": 566 },
-				{ "Name": "Tree Growth Kits",             "Value": 354 },
-				{ "Name": "Clothes Bundles",              "Value": 1302 }
-			]
+			"RelativePrices": {
+				"Medical Units":              1756,
+				"Heating Units":              100,
+				"Ice Units":                  566,
+				"Tree Growth Kits":           354,
+				"Clothes Bundles":            1302
+			}
 		},
 		{
 			"Name": "Schooloria",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Heating Units",                "Value": 100 },
-				{ "Name": "Ice Units",                    "Value": 100 },
-				{ "Name": "Ground Weapons",               "Value": 6 },
-				{ "Name": "Tree Growth Kits",             "Value": 234 },
-				{ "Name": "Jewels",                       "Value": 134 }
-			]
+			"RelativePrices": {
+				"Heating Units":              100,
+				"Ice Units":                  100,
+				"Ground Weapons":             6,
+				"Tree Growth Kits":           234,
+				"Jewels":                     134
+			}
 		},
 		{
 			"Name": "Uniland",
 			"BeaconOn": true,
-			"RelativePrices": [
-			]
+			"RelativePrices": {
+			}
 		},
 		{
 			"Name": "HomeWorld",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Medical Units",                "Value": 1783 },
-				{ "Name": "Heating Units",                "Value": 232 },
-				{ "Name": "Ice Units",                    "Value": 3223 },
-				{ "Name": "Ground Weapons",               "Value": 34 },
-				{ "Name": "Novelty Packs",                "Value": 345 },
-				{ "Name": "Jewels",                       "Value": 123 },
-				{ "Name": "Plastic Trinkets",             "Value": 543 },
-				{ "Name": "Clothes Bundles",              "Value": 123 }
-			]
+			"RelativePrices": {
+				"Medical Units":              1783,
+				"Heating Units":              232,
+				"Ice Units":                  3223,
+				"Ground Weapons":             34,
+				"Novelty Packs":              345,
+				"Jewels":                     123,
+				"Plastic Trinkets":           543,
+				"Clothes Bundles":            123
+			}
 		},
 		{
 			"Name": "Dreamora",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Device Of Cloakings",          "Value": 123 },
-				{ "Name": "Medical Units",                "Value": 87 },
-				{ "Name": "Heating Units",                "Value": 101 },
-				{ "Name": "Ice Units",                    "Value": 783 },
-				{ "Name": "Tree Growth Kits",             "Value": 103 },
-				{ "Name": "Plastic Trinkets",             "Value": 1489 },
-				{ "Name": "Clothes Bundles",              "Value": 908 },
-				{ "Name": "Fighter Drones",               "Value": 101 }
-			]
+			"RelativePrices": {
+				"Device Of Cloakings":        123,
+				"Medical Units":              87,
+				"Heating Units":              101,
+				"Ice Units":                  783,
+				"Tree Growth Kits":           103,
+				"Plastic Trinkets":           1489,
+				"Clothes Bundles":            908,
+				"Fighter Drones":             101
+			}
 		},
 		{
 			"Name": "Nirvana",
 			"BeaconOn": true,
-			"RelativePrices": [
-				{ "Name": "Device Of Cloakings",          "Value": 67 },
-				{ "Name": "AntiCloak Scanners",           "Value": 92 },
-				{ "Name": "Medical Units",                "Value": 56 },
-				{ "Name": "Heating Units",                "Value": 78 },
-				{ "Name": "Ice Units",                    "Value": 34 },
-				{ "Name": "Novelty Packs",                "Value": 44 },
-				{ "Name": "Tree Growth Kits",             "Value": 54 },
-				{ "Name": "Jewels",                       "Value": 89 },
-				{ "Name": "Plastic Trinkets",             "Value": 24 },
-				{ "Name": "Clothes Bundles",              "Value": 68 }
-			]
+			"RelativePrices": {
+				"Device Of Cloakings":        67,
+				"AntiCloak Scanners":         92,
+				"Medical Units":              56,
+				"Heating Units":              78,
+				"Ice Units":                  34,
+				"Novelty Packs":              44,
+				"Tree Growth Kits":           54,
+				"Jewels":                     89,
+				"Plastic Trinkets":           24,
+				"Clothes Bundles":            68
+			}
 		}
 	]
 }

@@ -25,22 +25,21 @@ import "fmt"
 var datafile = flag.String("planet_data_file", "planet-data",
 	"The file to read planet data from")
 
+type Commodity struct {
+	Name      string
+	BasePrice int
+	CanSell   bool
+	Limit     int
+}
+
 type planet_data struct {
-	Commodities []struct {
-		Name      string
-		BasePrice int
-		CanSell   bool
-		Limit     int
-	}
+	Commodities []Commodity
 	Planets []struct {
 		Name     string
 		BeaconOn bool
 		/* Use relative prices rather than absolute prices because you
 		   can get relative prices without traveling to each planet. */
-		RelativePrices []struct {
-			Name  string
-			Value int
-		}
+		RelativePrices map [string] int
 	}
 }
 
