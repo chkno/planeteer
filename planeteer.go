@@ -31,16 +31,16 @@ type Commodity struct {
 	CanSell   bool
 	Limit     int
 }
-
+type Planet struct {
+	Name     string
+	BeaconOn bool
+	/* Use relative prices rather than absolute prices because you
+	   can get relative prices without traveling to each planet. */
+	RelativePrices map [string] int
+}
 type planet_data struct {
 	Commodities []Commodity
-	Planets []struct {
-		Name     string
-		BeaconOn bool
-		/* Use relative prices rather than absolute prices because you
-		   can get relative prices without traveling to each planet. */
-		RelativePrices map [string] int
-	}
+	Planets []Planet
 }
 
 func ReadData() (data planet_data) {
@@ -56,22 +56,17 @@ func ReadData() (data planet_data) {
 	return
 }
 
-func TradeValue(data planet_data,
-                from_index, to_index, commodity_index, quantity int) int {
-
-	commodity := &data.Commodities[commodity_index]
+func TradeValue(from, to *Planet,
+                commodity *Commodity,
+                quantity int) int {
 	if !commodity.CanSell {
 		return 0
 	}
-
-	from_planet := &data.Planets[from_index]
-	from_relative_price, from_available := from_planet.RelativePrices[commodity.Name]
+	from_relative_price, from_available := from.RelativePrices[commodity.Name]
 	if !from_available {
 		return 0
 	}
-
-	to_planet := &data.Planets[to_index]
-	to_relative_price, to_available := to_planet.RelativePrices[commodity.Name]
+	to_relative_price, to_available := to.RelativePrices[commodity.Name]
 	if !to_available {
 		return 0
 	}
@@ -91,7 +86,10 @@ func FindBestTrades(data planet_data) [][]*Commodity {
 		for to_index := range data.Planets {
 			best_gain := 0
 			for commodity_index := range data.Commodities {
-				gain := TradeValue(data, from_index, to_index, commodity_index, 1)
+				gain := TradeValue(&data.Planets[from_index],
+				                   &data.Planets[to_index],
+				                   &data.Commodities[commodity_index],
+				                   1)
 				if gain > best_gain {
 					best[from_index][to_index] = &data.Commodities[commodity_index]
 					gain = best_gain
