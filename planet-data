@@ -1,114 +1,96 @@
 {
-	"Commodities": [
-		{
-			"Name": "AntiCloak Scanners",
+	"Commodities": {
+		"AntiCloak Scanners": {
 			"BasePrice": 100000,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Big Cargo Spaces",
+		"Big Cargo Spaces": {
 			"BasePrice": 0,
 			"CanSell": false,
 			"Limit": 0
 		},
-		{
-			"Name": "Clothes Bundles",
+		"Clothes Bundles": {
 			"BasePrice": 450,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Device Of Cloakings",
+		"Device Of Cloakings": {
 			"BasePrice": 5000,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Eden Warp Units",
+		"Eden Warp Units": {
 			"BasePrice": 25000,
 			"CanSell": true,
 			"Limit": 2
 		},
-		{
-			"Name": "Fighter Drones",
+		"Fighter Drones": {
 			"BasePrice": 200,
 			"CanSell": false,
 			"Limit": 0
 		},
-		{
-			"Name": "Ground Weapons",
+		"Ground Weapons": {
 			"BasePrice": 350,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Heating Units",
+		"Heating Units": {
 			"BasePrice": 1500,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Ice Units",
+		"Ice Units": {
 			"BasePrice": 200,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Jewels",
+		"Jewels": {
 			"BasePrice": 2000,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Medical Units",
+		"Medical Units": {
 			"BasePrice": 500,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Novelty Packs",
+		"Novelty Packs": {
 			"BasePrice": 100,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Onboard Printing Kits",
+		"Onboard Printing Kits": {
 			"BasePrice": 100000,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Plastic Trinkets",
+		"Plastic Trinkets": {
 			"BasePrice": 150,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Reactor Units",
+		"Reactor Units": {
 			"BasePrice": 100000,
 			"CanSell": false,
 			"Limit": 0
 		},
-		{
-			"Name": "Shield Batterys",
+		"Shield Batterys": {
 			"BasePrice": 100,
 			"CanSell": false,
 			"Limit": 0
 		},
-		{
-			"Name": "Tree Growth Kits",
+		"Tree Growth Kits": {
 			"BasePrice": 800,
 			"CanSell": true,
 			"Limit": 0
 		},
-		{
-			"Name": "Utopia Planetary Defenses",
+		"Utopia Planetary Defenses": {
 			"BasePrice": 5000000,
 			"CanSell": true,
 			"Limit": 0
 		}
-	],
+	},
 	"Planets": [
 		{
 			"Name": "Earth",
