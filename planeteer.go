@@ -56,8 +56,63 @@ func ReadData() (data planet_data) {
 	return
 }
 
+func TradeValue(data planet_data,
+                from_index, to_index, commodity_index, quantity int) int {
+
+	commodity := &data.Commodities[commodity_index]
+	if !commodity.CanSell {
+		return 0
+	}
+
+	from_planet := &data.Planets[from_index]
+	from_relative_price, from_available := from_planet.RelativePrices[commodity.Name]
+	if !from_available {
+		return 0
+	}
+
+	to_planet := &data.Planets[to_index]
+	to_relative_price, to_available := to_planet.RelativePrices[commodity.Name]
+	if !to_available {
+		return 0
+	}
+
+	from_absolute_price := from_relative_price * commodity.BasePrice
+	to_absolute_price := to_relative_price * commodity.BasePrice
+	buy_price := from_absolute_price
+	sell_price := int(float64(to_absolute_price) * 0.9)
+	return (sell_price - buy_price) * quantity
+
+}
+
+func FindBestTrades(data planet_data) [][]*Commodity {
+	best := make([][]*Commodity, len(data.Planets))
+	for from_index := range data.Planets {
+		best[from_index] = make([]*Commodity, len(data.Planets))
+		for to_index := range data.Planets {
+			best_gain := 0
+			for commodity_index := range data.Commodities {
+				gain := TradeValue(data, from_index, to_index, commodity_index, 1)
+				if gain > best_gain {
+					best[from_index][to_index] = &data.Commodities[commodity_index]
+					gain = best_gain
+				}
+			}
+		}
+	}
+	return best
+}
+
 func main() {
 	flag.Parse()
 	data := ReadData()
-	fmt.Printf("%v", data)
+	best_trades := FindBestTrades(data)
+	for from_index, from_planet := range data.Planets {
+		for to_index, to_planet := range data.Planets {
+			best_trade := "(nothing)"
+			if best_trades[from_index][to_index] != nil {
+				best_trade = best_trades[from_index][to_index].Name
+			}
+			fmt.Printf("%s to %s: %s\n", from_planet.Name, to_planet.Name, best_trade)
+		}
+	}
 }
