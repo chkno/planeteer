@@ -91,9 +91,8 @@
 			"Limit": 0
 		}
 	},
-	"Planets": [
-		{
-			"Name": "Earth",
+	"Planets": {
+		"Earth": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            100,
@@ -113,8 +112,7 @@
 				"Fighter Drones":             100
 			}
 		},
-		{
-			"Name": "Hothor",
+		"Hothor": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            176,
@@ -128,8 +126,7 @@
 				"Clothes Bundles":            290
 			}
 		},
-		{
-			"Name": "Volcana",
+		"Volcana": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Device Of Cloakings":        187,
@@ -141,8 +138,7 @@
 				"Clothes Bundles":            57
 			}
 		},
-		{
-			"Name": "Metallica",
+		"Metallica": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            67,
@@ -153,8 +149,7 @@
 				"Fighter Drones":             322
 			}
 		},
-		{
-			"Name": "Medoca",
+		"Medoca": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              23,
@@ -164,8 +159,7 @@
 				"Clothes Bundles":            54
 			}
 		},
-		{
-			"Name": "Gojuon",
+		"Gojuon": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Heating Units":              99,
@@ -177,8 +171,7 @@
 				"Clothes Bundles":            89
 			}
 		},
-		{
-			"Name": "Desha Rockna",
+		"Desha Rockna": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              134,
@@ -191,8 +184,7 @@
 				"Clothes Bundles":            87
 			}
 		},
-		{
-			"Name": "Dogafetch",
+		"Dogafetch": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            123,
@@ -207,8 +199,7 @@
 				"Clothes Bundles":            23
 			}
 		},
-		{
-			"Name": "Eden",
+		"Eden": {
 			"BeaconOn": false,
 			"RelativePrices": {
 				"Medical Units":              100,
@@ -216,8 +207,7 @@
 				"Eden Warp Units":            100
 			}
 		},
-		{
-			"Name": "Richiana",
+		"Richiana": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Device Of Cloakings":        157,
@@ -232,8 +222,7 @@
 				"Clothes Bundles":            465
 			}
 		},
-		{
-			"Name": "Tribonia",
+		"Tribonia": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              187,
@@ -246,8 +235,7 @@
 				"Clothes Bundles":            898
 			}
 		},
-		{
-			"Name": "Dune",
+		"Dune": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            143,
@@ -261,8 +249,7 @@
 				"Jewels":                     88
 			}
 		},
-		{
-			"Name": "Plague",
+		"Plague": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              239,
@@ -274,8 +261,7 @@
 				"Clothes Bundles":            90
 			}
 		},
-		{
-			"Name": "Norhaven",
+		"Norhaven": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            100,
@@ -296,8 +282,7 @@
 				"Onboard Printing Kits":      100
 			}
 		},
-		{
-			"Name": "Loony",
+		"Loony": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            500,
@@ -311,8 +296,7 @@
 				"Clothes Bundles":            67
 			}
 		},
-		{
-			"Name": "WeaponWorld",
+		"WeaponWorld": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            100,
@@ -330,8 +314,7 @@
 				"Onboard Printing Kits":      100
 			}
 		},
-		{
-			"Name": "Zoolie",
+		"Zoolie": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              78,
@@ -343,8 +326,7 @@
 				"Clothes Bundles":            100
 			}
 		},
-		{
-			"Name": "Baboria",
+		"Baboria": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              100,
@@ -358,8 +340,7 @@
 				"Clothes Bundles":            345
 			}
 		},
-		{
-			"Name": "StockWorld",
+		"StockWorld": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Shield Batterys":            103,
@@ -377,8 +358,7 @@
 				"Clothes Bundles":            98
 			}
 		},
-		{
-			"Name": "HugeLind Mar",
+		"HugeLind Mar": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Device Of Cloakings":        123,
@@ -390,8 +370,7 @@
 				"Clothes Bundles":            1320
 			}
 		},
-		{
-			"Name": "Sickonia",
+		"Sickonia": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              1756,
@@ -401,8 +380,7 @@
 				"Clothes Bundles":            1302
 			}
 		},
-		{
-			"Name": "Schooloria",
+		"Schooloria": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Heating Units":              100,
@@ -412,14 +390,12 @@
 				"Jewels":                     134
 			}
 		},
-		{
-			"Name": "Uniland",
+		"Uniland": {
 			"BeaconOn": true,
 			"RelativePrices": {
 			}
 		},
-		{
-			"Name": "HomeWorld",
+		"HomeWorld": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Medical Units":              1783,
@@ -432,8 +408,7 @@
 				"Clothes Bundles":            123
 			}
 		},
-		{
-			"Name": "Dreamora",
+		"Dreamora": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Device Of Cloakings":        123,
@@ -446,8 +421,7 @@
 				"Fighter Drones":             101
 			}
 		},
-		{
-			"Name": "Nirvana",
+		"Nirvana": {
 			"BeaconOn": true,
 			"RelativePrices": {
 				"Device Of Cloakings":        67,
@@ -462,5 +436,5 @@
 				"Clothes Bundles":            68
 			}
 		}
-	]
+	}
 }

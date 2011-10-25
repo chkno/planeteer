@@ -18,12 +18,46 @@
 package main
 
 import "flag"
+import "fmt"
 import "json"
 import "os"
-import "fmt"
+import "strings"
 
-var datafile = flag.String("planet_data_file", "planet-data",
+var start = flag.String("start", "",
+	"The planet to start at")
+
+var end = flag.String("end", "",
+	"A comma-separated list of planets to end at")
+
+var planet_data_file = flag.String("planet_data_file", "planet-data",
 	"The file to read planet data from")
+
+var fuel = flag.Int("fuel", 16,
+	"Reactor units; How many non-Eden jumps we can make " +
+	"(but remember that deviating from the flight plan " +
+	"costs two units of fuel per jump)")
+
+var start_edens = flag.Int("start_edens", 0,
+	"How many Eden Warp Units are you starting with?")
+
+var end_edens = flag.Int("end_edens", 0,
+	"How many Eden Warp Units would you like to keep (not use)?")
+
+var cloak = flag.Bool("cloak", false,
+	"Make sure to end with a Device of Cloaking")
+
+var drones = flag.Int("drones", 0,
+	"Buy this many Fighter Drones")
+
+var batteries = flag.Int("batteries", 0,
+	"Buy this many Shield Batterys")
+
+var visit_string = flag.String("visit", "",
+	"A comma-separated list of planets to make sure to visit")
+
+func visit() []string {
+	return strings.Split(*visit_string, ",")
+}
 
 type Commodity struct {
 	BasePrice int
@@ -31,7 +65,6 @@ type Commodity struct {
 	Limit     int
 }
 type Planet struct {
-	Name     string
 	BeaconOn bool
 	/* Use relative prices rather than absolute prices because you
 	   can get relative prices without traveling to each planet. */
@@ -39,11 +72,12 @@ type Planet struct {
 }
 type planet_data struct {
 	Commodities map [string] Commodity
-	Planets []Planet
+	Planets map [string] Planet
+	pi, ci map [string] int  // Generated; not read from file
 }
 
 func ReadData() (data planet_data) {
-	f, err := os.Open(*datafile)
+	f, err := os.Open(*planet_data_file)
 	if err != nil {
 		panic(err)
 	}
@@ -55,10 +89,105 @@ func ReadData() (data planet_data) {
 	return
 }
 
+/* This program operates by filling in a state table representing the best
+ * possible trips you could make; the ones that makes you the most money.
+ * This is feasible because we don't look at all the possible trips.
+ * We define a list of things that are germane to this game and then only
+ * consider the best outcome in each possible game state.
+ *
+ * Each cell in the table represents a state in the game.  In each cell,
+ * we track two things: 1. the most money you could possibly have while in
+ * that state and 2. one possible way to get into that state with that
+ * amount of money.
+ *
+ * A basic analysis can be done with a two-dimensional table: location and
+ * fuel.  planeteer-1.0 used this two-dimensional table.  This version
+ * adds features mostly by adding dimensions to this table.
+ *
+ * Note that the sizes of each dimension are data driven.  Many dimensions
+ * collapse to one possible value (ie, disappear) if the corresponding
+ * feature is not enabled.
+ */
+
+// The official list of dimensions:
+const (
+	// Name          Num  Size  Description
+	Edens = iota  //   1     3  # of Eden warp units (0 - 2 typically)
+	Cloaks        //   2     2  # of Devices of Cloaking (0 or 1)
+	UnusedCargo   //   3     4  # of unused cargo spaces (0 - 3 typically)
+	Fuel          //   4    17  Reactor power left (0 - 16)
+	Location      //   5    26  Location (which planet)
+	Hold          //   6    15  Cargo bay contents (a *Commodity or nil)
+	NeedFighters  //   7     2  Errand: Buy fighter drones (needed or not)
+	NeedShields   //   8     2  Errand: Buy shield batteries (needed or not)
+	Visit         //   9  2**N  Visit: Stop by these N planets in the route
+
+	NumDimensions
+)
+
+func bint(b bool) int {
+	if b { return 1 }
+	return 0
+}
+
+func DimensionSizes(data planet_data) []int {
+	eden_capacity := data.Commodities["Eden Warp Units"].Limit
+	cloak_capacity := bint(*cloak)
+	dims := []int{
+		eden_capacity + 1,
+		cloak_capacity + 1,
+		eden_capacity + cloak_capacity + 1,
+		*fuel + 1,
+		len(data.Planets),
+		len(data.Commodities),
+		bint(*drones > 0) + 1,
+		bint(*batteries > 0) + 1,
+		1 << uint(len(visit())),
+	}
+	if len(dims) != NumDimensions {
+		panic("Dimensionality mismatch")
+	}
+	return dims
+}
+
+func StateTableSize(dims []int) int {
+	sum := 0
+	for _, size := range dims {
+		sum += size
+	}
+	return sum
+}
+
+type State struct {
+	funds, from int
+}
+
+func NewStateTable(dims []int) []State {
+	return make([]State, StateTableSize(dims))
+}
+
+func EncodeIndex(dims, addr []int) int {
+	index := addr[0]
+	for i := 1; i < len(dims); i++ {
+		index = index * dims[i] + addr[i]
+	}
+	return index
+}
+
+func DecodeIndex(dims []int, index int) []int {
+	addr := make([]int, len(dims))
+	for i := len(dims) - 1; i > 0; i-- {
+		addr[i] = index % dims[i]
+		index /= dims[i]
+	}
+	addr[0] = index
+	return addr
+}
+
 /* What is the value of hauling 'commodity' from 'from' to 'to'?
  * Take into account the available funds and the available cargo space. */
 func TradeValue(data planet_data,
-                from, to *Planet,
+                from, to Planet,
                 commodity string,
                 initial_funds, max_quantity int) int {
 	if !data.Commodities[commodity].CanSell {
@@ -87,24 +216,25 @@ func TradeValue(data planet_data,
 }
 
 func FindBestTrades(data planet_data) [][]string {
+	// TODO: We can't cache this because this can change based on available funds.
 	best := make([][]string, len(data.Planets))
-	for from_index, from_planet := range data.Planets {
-		best[from_index] = make([]string, len(data.Planets))
-		for to_index, to_planet := range data.Planets {
+	for from := range data.Planets {
+		best[data.pi[from]] = make([]string, len(data.Planets))
+		for to := range data.Planets {
 			best_gain := 0
-			price_list := from_planet.RelativePrices
-			if len(to_planet.RelativePrices) < len(from_planet.RelativePrices) {
-				price_list = to_planet.RelativePrices
+			price_list := data.Planets[from].RelativePrices
+			if len(data.Planets[to].RelativePrices) < len(data.Planets[from].RelativePrices) {
+				price_list = data.Planets[to].RelativePrices
 			}
 			for commodity := range price_list {
 				gain := TradeValue(data,
-				                   &from_planet,
-				                   &to_planet,
+				                   data.Planets[from],
+				                   data.Planets[to],
 				                   commodity,
 				                   10000000,
 				                   1)
 				if gain > best_gain {
-					best[from_index][to_index] = commodity
+					best[data.pi[from]][data.pi[to]] = commodity
 					gain = best_gain
 				}
 			}
@@ -113,17 +243,43 @@ func FindBestTrades(data planet_data) [][]string {
 	return best
 }
 
+// (Example of a use case for generics in Go)
+func IndexPlanets(m *map [string] Planet) map [string] int {
+	index := make(map [string] int, len(*m))
+	i := 0
+	for e := range *m {
+		index[e] = i
+		i++
+	}
+	return index
+}
+func IndexCommodities(m *map [string] Commodity) map [string] int {
+	index := make(map [string] int, len(*m))
+	i := 0
+	for e := range *m {
+		index[e] = i
+		i++
+	}
+	return index
+}
+
 func main() {
 	flag.Parse()
 	data := ReadData()
+	data.pi = IndexPlanets(&data.Planets)
+	data.ci = IndexCommodities(&data.Commodities)
+	dims := DimensionSizes(data)
+	table := NewStateTable(dims)
+	table[0] = State{ 1, 1 }
 	best_trades := FindBestTrades(data)
-	for from_index, from_planet := range data.Planets {
-		for to_index, to_planet := range data.Planets {
+
+	for from := range data.Planets {
+		for to := range data.Planets {
 			best_trade := "(nothing)"
-			if best_trades[from_index][to_index] != "" {
-				best_trade = best_trades[from_index][to_index]
+			if best_trades[data.pi[from]][data.pi[to]] != "" {
+				best_trade = best_trades[data.pi[from]][data.pi[to]]
 			}
-			fmt.Printf("%s to %s: %s\n", from_planet.Name, to_planet.Name, best_trade)
+			fmt.Printf("%s to %s: %s\n", from, to, best_trade)
 		}
 	}
 }
