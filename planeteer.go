@@ -27,15 +27,14 @@ var start = flag.String("start", "",
 	"The planet to start at")
 
 var end = flag.String("end", "",
-	"A comma-separated list of planets to end at")
+	"A comma-separated list of acceptable ending planets.")
 
 var planet_data_file = flag.String("planet_data_file", "planet-data",
 	"The file to read planet data from")
 
-var fuel = flag.Int("fuel", 16,
-	"Reactor units; How many non-Eden jumps we can make "+
-		"(but remember that deviating from the flight plan "+
-		"costs two units of fuel per jump)")
+var fuel = flag.Int("fuel", 16, "Reactor units")
+
+var hold = flag.Int("hold", 300, "Size of your cargo hold")
 
 var start_edens = flag.Int("start_edens", 0,
 	"How many Eden Warp Units are you starting with?")
@@ -46,11 +45,9 @@ var end_edens = flag.Int("end_edens", 0,
 var cloak = flag.Bool("cloak", false,
 	"Make sure to end with a Device of Cloaking")
 
-var drones = flag.Int("drones", 0,
-	"Buy this many Fighter Drones")
+var drones = flag.Int("drones", 0, "Buy this many Fighter Drones")
 
-var batteries = flag.Int("batteries", 0,
-	"Buy this many Shield Batterys")
+var batteries = flag.Int("batteries", 0, "Buy this many Shield Batterys")
 
 var visit_string = flag.String("visit", "",
 	"A comma-separated list of planets to make sure to visit")
@@ -111,7 +108,7 @@ func ReadData() (data planet_data) {
 
 // The official list of dimensions:
 const (
-	// Name          Num  Size  Description
+	// Name                Num  Size  Description
 	Edens        = iota //   1     3  # of Eden warp units (0 - 2 typically)
 	Cloaks              //   2     2  # of Devices of Cloaking (0 or 1)
 	UnusedCargo         //   3     4  # of unused cargo spaces (0 - 3 typically)
