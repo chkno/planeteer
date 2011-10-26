@@ -70,7 +70,8 @@ type Planet struct {
 type planet_data struct {
 	Commodities map[string]Commodity
 	Planets     map[string]Planet
-	pi, ci      map[string]int // Generated; not read from file
+	p2i, c2i    map[string]int // Generated; not read from file
+	i2p, i2c    []string       // Generated; not read from file
 }
 
 func ReadData() (data planet_data) {
@@ -104,6 +105,15 @@ func ReadData() (data planet_data) {
  * Note that the sizes of each dimension are data driven.  Many dimensions
  * collapse to one possible value (ie, disappear) if the corresponding
  * feature is not enabled.
+ *
+ * The order of the dimensions in the list of constants below determines
+ * their layout in RAM.  The cargo-based 'dimensions' are not completely
+ * independent -- some combinations are illegal and not used.  They are
+ * handled as three dimensions rather than one for simplicity.  Placing
+ * these dimensions first causes the unused cells in the table to be
+ * grouped together in large blocks.  This keeps them from polluting
+ * cache lines, and if they are large enough, prevent the memory manager
+ * from allocating pages for these areas at all.
  */
 
 // The official list of dimensions:
@@ -164,10 +174,6 @@ type State struct {
 	funds, from int
 }
 
-func NewStateTable(dims []int) []State {
-	return make([]State, StateTableSize(dims))
-}
-
 func EncodeIndex(dims, addr []int) int {
 	index := addr[0]
 	for i := 1; i < len(dims); i++ {
@@ -184,6 +190,96 @@ func DecodeIndex(dims []int, index int) []int {
 	}
 	addr[0] = index
 	return addr
+}
+
+func FillStateCell(data planet_data, dims []int, table []State, addr []int) {
+}
+
+func FillStateTable2(data planet_data, dims []int, table []State,
+fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
+	/* The dimension nesting order up to this point is important.
+	 * Beyond this point, it's not important.
+	 *
+	 * It is very important when iterating through the Hold dimension
+	 * to visit the null commodity (empty hold) first.  Visiting the
+	 * null commodity represents selling.  Visiting it first gets the
+	 * action order correct: arrive, sell, buy, leave.  Visiting the
+	 * null commodity after another commodity would evaluate the action
+	 * sequence: arrive, buy, sell, leave.  This is a useless action
+	 * sequence.  Because we visit the null commodity first, we do not
+	 * consider these action sequences.
+	 */
+	eden_capacity := data.Commodities["Eden Warp Units"].Limit
+	addr := make([]int, len(dims))
+	addr[Edens] = edens_remaining
+	addr[Fuel] = fuel_remaining
+	addr[Location] = data.p2i[planet]
+	for addr[Hold] = 0; addr[Hold] < dims[Hold]; addr[Hold]++ {
+		for addr[Cloaks] = 0; addr[Cloaks] < dims[Cloaks]; addr[Cloaks]++ {
+			for addr[UnusedCargo] = 0;
+			    addr[UnusedCargo] < dims[UnusedCargo];
+			    addr[UnusedCargo]++ {
+				if addr[Edens] + addr[Cloaks] + addr[UnusedCargo] <=
+				   eden_capacity + 1 {
+					for addr[NeedFighters] = 0;
+					    addr[NeedFighters] < dims[NeedFighters];
+					    addr[NeedFighters]++ {
+						for addr[NeedShields] = 0;
+						    addr[NeedShields] < dims[NeedShields];
+						    addr[NeedShields]++ {
+							for addr[Visit] = 0;
+							    addr[Visit] < dims[Visit];
+							    addr[Visit]++ {
+								FillStateCell(data, dims, table, addr)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	barrier <- true
+}
+
+/* Filling the state table is a set of nested for loops NumDimensions deep.
+ * We split this into two procedures: 1 and 2.  #1 is the outer, slowest-
+ * changing indexes.  #1 fires off many calls to #2 that run in parallel.
+ * The order of the nesting of the dimensions, the order of iteration within
+ * each dimension, and where the 1 / 2 split is placed are carefully chosen 
+ * to make this arrangement safe.
+ *
+ * Outermost two layers: Go from high-energy states (lots of fuel, edens) to
+ * low-energy state.  These must be processed sequentially and in this order
+ * because you travel through high-energy states to get to the low-energy
+ * states.
+ *
+ * Third layer: Planet.  This is a good layer to parallelize on.  There's
+ * high enough cardinality that we don't have to mess with parallelizing
+ * multiple layers for good utilization (on 2011 machines).  Each thread
+ * works on one planet's states and need not synchronize with peer threads.
+ */
+func FillStateTable1(data planet_data, dims []int) []State {
+	table := make([]State, StateTableSize(dims))
+	barrier := make(chan bool, len(data.Planets))
+	eden_capacity := data.Commodities["Eden Warp Units"].Limit
+	work_units := (float64(*fuel) + 1) * (float64(eden_capacity) + 1)
+	work_done := 0.0
+	for fuel_remaining := *fuel; fuel_remaining >= 0; fuel_remaining-- {
+		for edens_remaining := eden_capacity;
+		    edens_remaining >= 0;
+		    edens_remaining-- {
+			for planet := range data.Planets {
+				go FillStateTable2(data, dims, table, fuel_remaining,
+					edens_remaining, planet, barrier)
+			}
+			for _ = range data.Planets {
+				<-barrier
+			}
+			work_done++
+			fmt.Printf("\r%3.0f%%", 100 * work_done / work_units)
+		}
+	}
+	return table
 }
 
 /* What is the value of hauling 'commodity' from 'from' to 'to'?
@@ -221,7 +317,7 @@ func FindBestTrades(data planet_data) [][]string {
 	// TODO: We can't cache this because this can change based on available funds.
 	best := make([][]string, len(data.Planets))
 	for from := range data.Planets {
-		best[data.pi[from]] = make([]string, len(data.Planets))
+		best[data.p2i[from]] = make([]string, len(data.Planets))
 		for to := range data.Planets {
 			best_gain := 0
 			price_list := data.Planets[from].RelativePrices
@@ -236,7 +332,7 @@ func FindBestTrades(data planet_data) [][]string {
 					10000000,
 					1)
 				if gain > best_gain {
-					best[data.pi[from]][data.pi[to]] = commodity
+					best[data.p2i[from]][data.p2i[to]] = commodity
 					gain = best_gain
 				}
 			}
@@ -246,40 +342,44 @@ func FindBestTrades(data planet_data) [][]string {
 }
 
 // (Example of a use case for generics in Go)
-func IndexPlanets(m *map[string]Planet) map[string]int {
-	index := make(map[string]int, len(*m))
-	i := 0
+func IndexPlanets(m *map[string]Planet, start_at int) (map[string]int, []string) {
+	e2i := make(map[string]int, len(*m) + start_at)
+	i2e := make([]string, len(*m) + start_at)
+	i := start_at
 	for e := range *m {
-		index[e] = i
+		e2i[e] = i
+		i2e[i] = e
 		i++
 	}
-	return index
+	return e2i, i2e
 }
-func IndexCommodities(m *map[string]Commodity) map[string]int {
-	index := make(map[string]int, len(*m))
-	i := 0
+func IndexCommodities(m *map[string]Commodity, start_at int) (map[string]int, []string) {
+	e2i := make(map[string]int, len(*m) + start_at)
+	i2e := make([]string, len(*m) + start_at)
+	i := start_at
 	for e := range *m {
-		index[e] = i
+		e2i[e] = i
+		i2e[i] = e
 		i++
 	}
-	return index
+	return e2i, i2e
 }
 
 func main() {
 	flag.Parse()
 	data := ReadData()
-	data.pi = IndexPlanets(&data.Planets)
-	data.ci = IndexCommodities(&data.Commodities)
+	data.p2i, data.i2p = IndexPlanets(&data.Planets, 0)
+	data.c2i, data.i2c = IndexCommodities(&data.Commodities, 1)
 	dims := DimensionSizes(data)
-	table := NewStateTable(dims)
+	table := FillStateTable1(data, dims)
 	table[0] = State{1, 1}
 	best_trades := FindBestTrades(data)
 
 	for from := range data.Planets {
 		for to := range data.Planets {
 			best_trade := "(nothing)"
-			if best_trades[data.pi[from]][data.pi[to]] != "" {
-				best_trade = best_trades[data.pi[from]][data.pi[to]]
+			if best_trades[data.p2i[from]][data.p2i[to]] != "" {
+				best_trade = best_trades[data.p2i[from]][data.p2i[to]]
 			}
 			fmt.Printf("%s to %s: %s\n", from, to, best_trade)
 		}
