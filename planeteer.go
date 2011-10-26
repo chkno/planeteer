@@ -26,6 +26,9 @@ import "strings"
 var start = flag.String("start", "",
 	"The planet to start at")
 
+var flight_plan = flag.String("flight_plan", "",
+	"Your hidey-holes for the day, comma-separated.")
+
 var end = flag.String("end", "",
 	"A comma-separated list of acceptable ending planets.")
 
@@ -171,7 +174,7 @@ func StateTableSize(dims []int) int {
 }
 
 type State struct {
-	funds, from int
+	value, from int
 }
 
 func EncodeIndex(dims, addr []int) int {
@@ -192,7 +195,35 @@ func DecodeIndex(dims []int, index int) []int {
 	return addr
 }
 
-func FillStateCell(data planet_data, dims []int, table []State, addr []int) {
+/* Fill in the cell at address addr by looking at all the possible ways
+ * to reach this cell and selecting the best one.
+ *
+ * The other obvious implementation choice is to do this the other way
+ * around -- for each cell, conditionally overwrite all the other cells
+ * that are reachable *from* the considered cell.  We choose gathering
+ * reads over scattering writes to avoid having to take a bunch of locks.
+ *
+ * The order that we check things here matters only for value ties.  We
+ * keep the first best path.  So when action order doesn't matter, the
+ * check that is performed first here will appear in the output first.
+ */
+func FillStateTableCell(data planet_data, dims []int, table []State, addr []int) {
+	/* Travel here via jumping */
+	/* Travel here via Eden Warp Unit */
+	/* Silly: Dump Eden warp units */
+	/* Buy Eden warp units */
+	/* Buy a Device of Cloaking */
+	/* Silly: Dump a Device of Cloaking */
+	/* Buy Fighter Drones */
+	/* Buy Shield Batteries */
+	if addr[Hold] == 0 {
+		/* Sell or dump things */
+		for commodity := range data.Commodities {
+		}
+	} else {
+		/* Buy this thing */
+	}
+	/* Visit this planet */
 }
 
 func FillStateTable2(data planet_data, dims []int, table []State,
@@ -222,7 +253,7 @@ fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
 					for addr[NeedFighters] = 0; addr[NeedFighters] < dims[NeedFighters]; addr[NeedFighters]++ {
 						for addr[NeedShields] = 0; addr[NeedShields] < dims[NeedShields]; addr[NeedShields]++ {
 							for addr[Visit] = 0; addr[Visit] < dims[Visit]; addr[Visit]++ {
-								FillStateCell(data, dims, table, addr)
+								FillStateTableCell(data, dims, table, addr)
 							}
 						}
 					}
