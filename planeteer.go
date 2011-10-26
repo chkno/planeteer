@@ -142,6 +142,13 @@ func DimensionSizes(data planet_data) []int {
 	dims[NeedFighters] = bint(*drones > 0) + 1
 	dims[NeedShields] = bint(*batteries > 0) + 1
 	dims[Visit] = 1 << uint(len(visit()))
+
+	// Remind myself to add a line above when adding new dimensions
+	for i, dim := range dims {
+		if dim < 1 {
+			panic(i)
+		}
+	}
 	return dims
 }
 
