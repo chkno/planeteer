@@ -132,20 +132,16 @@ func bint(b bool) int {
 func DimensionSizes(data planet_data) []int {
 	eden_capacity := data.Commodities["Eden Warp Units"].Limit
 	cloak_capacity := bint(*cloak)
-	dims := []int{
-		eden_capacity + 1,
-		cloak_capacity + 1,
-		eden_capacity + cloak_capacity + 1,
-		*fuel + 1,
-		len(data.Planets),
-		len(data.Commodities),
-		bint(*drones > 0) + 1,
-		bint(*batteries > 0) + 1,
-		1 << uint(len(visit())),
-	}
-	if len(dims) != NumDimensions {
-		panic("Dimensionality mismatch")
-	}
+	dims := make([]int, NumDimensions)
+	dims[Edens] = eden_capacity + 1
+	dims[Cloaks] = cloak_capacity + 1
+	dims[UnusedCargo] = eden_capacity + cloak_capacity + 1
+	dims[Fuel] = *fuel + 1
+	dims[Location] = len(data.Planets)
+	dims[Hold] = len(data.Commodities)
+	dims[NeedFighters] = bint(*drones > 0) + 1
+	dims[NeedShields] = bint(*batteries > 0) + 1
+	dims[Visit] = 1 << uint(len(visit()))
 	return dims
 }
 
