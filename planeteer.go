@@ -216,20 +216,12 @@ fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
 	addr[Location] = data.p2i[planet]
 	for addr[Hold] = 0; addr[Hold] < dims[Hold]; addr[Hold]++ {
 		for addr[Cloaks] = 0; addr[Cloaks] < dims[Cloaks]; addr[Cloaks]++ {
-			for addr[UnusedCargo] = 0;
-			    addr[UnusedCargo] < dims[UnusedCargo];
-			    addr[UnusedCargo]++ {
-				if addr[Edens] + addr[Cloaks] + addr[UnusedCargo] <=
-				   eden_capacity + 1 {
-					for addr[NeedFighters] = 0;
-					    addr[NeedFighters] < dims[NeedFighters];
-					    addr[NeedFighters]++ {
-						for addr[NeedShields] = 0;
-						    addr[NeedShields] < dims[NeedShields];
-						    addr[NeedShields]++ {
-							for addr[Visit] = 0;
-							    addr[Visit] < dims[Visit];
-							    addr[Visit]++ {
+			for addr[UnusedCargo] = 0; addr[UnusedCargo] < dims[UnusedCargo]; addr[UnusedCargo]++ {
+				if addr[Edens]+addr[Cloaks]+addr[UnusedCargo] <=
+					eden_capacity+1 {
+					for addr[NeedFighters] = 0; addr[NeedFighters] < dims[NeedFighters]; addr[NeedFighters]++ {
+						for addr[NeedShields] = 0; addr[NeedShields] < dims[NeedShields]; addr[NeedShields]++ {
+							for addr[Visit] = 0; addr[Visit] < dims[Visit]; addr[Visit]++ {
 								FillStateCell(data, dims, table, addr)
 							}
 						}
@@ -265,9 +257,7 @@ func FillStateTable1(data planet_data, dims []int) []State {
 	work_units := (float64(*fuel) + 1) * (float64(eden_capacity) + 1)
 	work_done := 0.0
 	for fuel_remaining := *fuel; fuel_remaining >= 0; fuel_remaining-- {
-		for edens_remaining := eden_capacity;
-		    edens_remaining >= 0;
-		    edens_remaining-- {
+		for edens_remaining := eden_capacity; edens_remaining >= 0; edens_remaining-- {
 			for planet := range data.Planets {
 				go FillStateTable2(data, dims, table, fuel_remaining,
 					edens_remaining, planet, barrier)
@@ -276,7 +266,7 @@ func FillStateTable1(data planet_data, dims []int) []State {
 				<-barrier
 			}
 			work_done++
-			fmt.Printf("\r%3.0f%%", 100 * work_done / work_units)
+			fmt.Printf("\r%3.0f%%", 100*work_done/work_units)
 		}
 	}
 	return table
@@ -343,8 +333,8 @@ func FindBestTrades(data planet_data) [][]string {
 
 // (Example of a use case for generics in Go)
 func IndexPlanets(m *map[string]Planet, start_at int) (map[string]int, []string) {
-	e2i := make(map[string]int, len(*m) + start_at)
-	i2e := make([]string, len(*m) + start_at)
+	e2i := make(map[string]int, len(*m)+start_at)
+	i2e := make([]string, len(*m)+start_at)
 	i := start_at
 	for e := range *m {
 		e2i[e] = i
@@ -354,8 +344,8 @@ func IndexPlanets(m *map[string]Planet, start_at int) (map[string]int, []string)
 	return e2i, i2e
 }
 func IndexCommodities(m *map[string]Commodity, start_at int) (map[string]int, []string) {
-	e2i := make(map[string]int, len(*m) + start_at)
-	i2e := make([]string, len(*m) + start_at)
+	e2i := make(map[string]int, len(*m)+start_at)
+	i2e := make([]string, len(*m)+start_at)
 	i := start_at
 	for e := range *m {
 		e2i[e] = i
