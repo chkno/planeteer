@@ -26,7 +26,7 @@ import "strings"
 var start = flag.String("start", "",
 	"The planet to start at")
 
-var flight_plan = flag.String("flight_plan", "",
+var flight_plan_string = flag.String("flight_plan", "",
 	"Your hidey-holes for the day, comma-separated.")
 
 var end = flag.String("end", "",
@@ -56,7 +56,17 @@ var visit_string = flag.String("visit", "",
 	"A comma-separated list of planets to make sure to visit")
 
 func visit() []string {
+	if *visit_string == "" {
+		return []string{}
+	}
 	return strings.Split(*visit_string, ",")
+}
+
+func flight_plan() []string {
+	if *flight_plan_string == "" {
+		return []string{}
+	}
+	return strings.Split(*flight_plan_string, ",")
 }
 
 type Commodity struct {
@@ -117,6 +127,17 @@ func ReadData() (data planet_data) {
  * grouped together in large blocks.  This keeps them from polluting
  * cache lines, and if they are large enough, prevent the memory manager
  * from allocating pages for these areas at all.
+ *
+ * If the table gets too big to fit in RAM:
+ *    * Combine the Edens, Cloaks, and UnusedCargo dimensions.  Of the
+ *      24 combinations, only 15 are legal: a 38% savings.
+ *    * Reduce the size of the Fuel dimension to 3.  We only ever look
+ *      backwards 2 units, so just rotate the logical values through
+ *      the same 3 physical addresses.  This is good for an 82% savings.
+ *    * Reduce the size of the Edens dimension from 3 to 2, for the
+ *      same reasons as Fuel above.  33% savings.
+ *    * Buy more ram.  (Just sayin'.  It's cheaper than you think.)
+ *      
  */
 
 // The official list of dimensions:
@@ -166,11 +187,11 @@ func DimensionSizes(data planet_data) []int {
 }
 
 func StateTableSize(dims []int) int {
-	sum := 0
+	product := 1
 	for _, size := range dims {
-		sum += size
+		product *= size
 	}
-	return sum
+	return product
 }
 
 type State struct {
@@ -179,7 +200,13 @@ type State struct {
 
 func EncodeIndex(dims, addr []int) int {
 	index := addr[0]
+	if addr[0] > dims[0] {
+		panic(0)
+	}
 	for i := 1; i < len(dims); i++ {
+		if addr[i] > dims[i] {
+			panic(i)
+		}
 		index = index*dims[i] + addr[i]
 	}
 	return index
@@ -195,6 +222,9 @@ func DecodeIndex(dims []int, index int) []int {
 	return addr
 }
 
+func InitializeStateTable(data planet_data, dims []int, table []State) {
+}
+
 /* Fill in the cell at address addr by looking at all the possible ways
  * to reach this cell and selecting the best one.
  *
@@ -208,7 +238,38 @@ func DecodeIndex(dims []int, index int) []int {
  * check that is performed first here will appear in the output first.
  */
 func FillStateTableCell(data planet_data, dims []int, table []State, addr []int) {
-	/* Travel here via jumping */
+	my_index := EncodeIndex(dims, addr)
+	other := make([]int, NumDimensions)
+	copy(other, addr)
+
+	/* Travel here via a 2-fuel unit jump */
+	if addr[Fuel] + 2 < dims[Fuel] {
+		other[Fuel] = addr[Fuel] + 2
+		for p := 0; p < dims[Location]; p++ {
+			other[Location] = p
+			if table[EncodeIndex(dims, other)].value > table[my_index].value {
+				table[my_index].value = table[EncodeIndex(dims, other)].value
+				table[my_index].from = EncodeIndex(dims, other)
+			}
+		}
+		other[Location] = addr[Location]
+		other[Fuel] = addr[Fuel]
+	}
+
+	/* Travel here via a hidey hole */
+	if addr[Fuel] + 1 < dims[Fuel] {
+		hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 1)
+		if hole_index < len(flight_plan()) {
+			other[Fuel] = addr[Fuel] + 1
+			other[Location] = data.p2i[flight_plan()[hole_index]]
+			if table[EncodeIndex(dims, other)].value > table[my_index].value {
+				table[my_index].value = table[EncodeIndex(dims, other)].value
+				table[my_index].from = EncodeIndex(dims, other)
+			}
+			other[Fuel] = addr[Fuel]
+		}
+	}
+
 	/* Travel here via Eden Warp Unit */
 	/* Silly: Dump Eden warp units */
 	/* Buy Eden warp units */
@@ -218,8 +279,7 @@ func FillStateTableCell(data planet_data, dims []int, table []State, addr []int)
 	/* Buy Shield Batteries */
 	if addr[Hold] == 0 {
 		/* Sell or dump things */
-		for commodity := range data.Commodities {
-		}
+		// for commodity := range data.Commodities { }
 	} else {
 		/* Buy this thing */
 	}
@@ -281,8 +341,7 @@ fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
  * multiple layers for good utilization (on 2011 machines).  Each thread
  * works on one planet's states and need not synchronize with peer threads.
  */
-func FillStateTable1(data planet_data, dims []int) []State {
-	table := make([]State, StateTableSize(dims))
+func FillStateTable1(data planet_data, dims []int, table []State) {
 	barrier := make(chan bool, len(data.Planets))
 	eden_capacity := data.Commodities["Eden Warp Units"].Limit
 	work_units := (float64(*fuel) + 1) * (float64(eden_capacity) + 1)
@@ -300,7 +359,7 @@ func FillStateTable1(data planet_data, dims []int) []State {
 			fmt.Printf("\r%3.0f%%", 100*work_done/work_units)
 		}
 	}
-	return table
+	print("\n")
 }
 
 /* What is the value of hauling 'commodity' from 'from' to 'to'?
@@ -392,8 +451,11 @@ func main() {
 	data.p2i, data.i2p = IndexPlanets(&data.Planets, 0)
 	data.c2i, data.i2c = IndexCommodities(&data.Commodities, 1)
 	dims := DimensionSizes(data)
-	table := FillStateTable1(data, dims)
-	table[0] = State{1, 1}
+	table := make([]State, StateTableSize(dims))
+	InitializeStateTable(data, dims, table)
+	FillStateTable1(data, dims, table)
+	print("Going to print state table...")
+	fmt.Printf("%v", table)
 	best_trades := FindBestTrades(data)
 
 	for from := range data.Planets {
