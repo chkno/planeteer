@@ -23,6 +23,9 @@ import "json"
 import "os"
 import "strings"
 
+var funds = flag.Int("funds", 0,
+	"Starting funds")
+
 var start = flag.String("start", "",
 	"The planet to start at")
 
@@ -165,6 +168,9 @@ func bint(b bool) int {
 
 func DimensionSizes(data planet_data) []int {
 	eden_capacity := data.Commodities["Eden Warp Units"].Limit
+	if *start_edens > eden_capacity {
+		eden_capacity = *start_edens
+	}
 	cloak_capacity := bint(*cloak)
 	dims := make([]int, NumDimensions)
 	dims[Edens] = eden_capacity + 1
@@ -203,7 +209,7 @@ func EncodeIndex(dims, addr []int) int {
 	if addr[0] > dims[0] {
 		panic(0)
 	}
-	for i := 1; i < len(dims); i++ {
+	for i := 1; i < NumDimensions; i++ {
 		if addr[i] > dims[i] {
 			panic(i)
 		}
@@ -213,8 +219,8 @@ func EncodeIndex(dims, addr []int) int {
 }
 
 func DecodeIndex(dims []int, index int) []int {
-	addr := make([]int, len(dims))
-	for i := len(dims) - 1; i > 0; i-- {
+	addr := make([]int, NumDimensions)
+	for i := NumDimensions - 1; i > 0; i-- {
 		addr[i] = index % dims[i]
 		index /= dims[i]
 	}
@@ -222,105 +228,173 @@ func DecodeIndex(dims []int, index int) []int {
 	return addr
 }
 
-func InitializeStateTable(data planet_data, dims []int, table []State) {
+func InitializeStateTable(data planet_data, dims []int) []State {
+	table := make([]State, StateTableSize(dims))
+
+	addr := make([]int, NumDimensions)
+	addr[Fuel] = *fuel
+	addr[Edens] = *start_edens
+	addr[Location] = data.p2i[*start]
+	table[EncodeIndex(dims, addr)].value = *funds
+
+	return table
 }
 
-/* Fill in the cell at address addr by looking at all the possible ways
- * to reach this cell and selecting the best one.
+/* These four fill procedures fill in the cell at address addr by
+ * looking at all the possible ways to reach this cell and selecting
+ * the best one.
  *
  * The other obvious implementation choice is to do this the other way
  * around -- for each cell, conditionally overwrite all the other cells
  * that are reachable *from* the considered cell.  We choose gathering
  * reads over scattering writes to avoid having to take a bunch of locks.
- *
- * The order that we check things here matters only for value ties.  We
- * keep the first best path.  So when action order doesn't matter, the
- * check that is performed first here will appear in the output first.
  */
-func FillStateTableCell(data planet_data, dims []int, table []State, addr []int) {
+
+func UpdateCell(table []State, here, there, value_difference int) {
+	possible_value := table[there].value + value_difference
+	if table[there].value > 0 && possible_value > table[here].value {
+		table[here].value = possible_value
+		table[here].from = there
+	}
+}
+
+func FillCellByArriving(data planet_data, dims []int, table []State, addr []int) {
 	my_index := EncodeIndex(dims, addr)
 	other := make([]int, NumDimensions)
 	copy(other, addr)
 
 	/* Travel here via a 2-fuel unit jump */
-	if addr[Fuel] + 2 < dims[Fuel] {
+	if addr[Fuel]+2 < dims[Fuel] {
 		other[Fuel] = addr[Fuel] + 2
-		for p := 0; p < dims[Location]; p++ {
-			other[Location] = p
-			if table[EncodeIndex(dims, other)].value > table[my_index].value {
-				table[my_index].value = table[EncodeIndex(dims, other)].value
-				table[my_index].from = EncodeIndex(dims, other)
-			}
+		for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
+			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
 		}
 		other[Location] = addr[Location]
 		other[Fuel] = addr[Fuel]
 	}
 
 	/* Travel here via a hidey hole */
-	if addr[Fuel] + 1 < dims[Fuel] {
+	if addr[Fuel]+1 < dims[Fuel] {
 		hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 1)
 		if hole_index < len(flight_plan()) {
 			other[Fuel] = addr[Fuel] + 1
 			other[Location] = data.p2i[flight_plan()[hole_index]]
-			if table[EncodeIndex(dims, other)].value > table[my_index].value {
-				table[my_index].value = table[EncodeIndex(dims, other)].value
-				table[my_index].from = EncodeIndex(dims, other)
-			}
+			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+			other[Location] = addr[Location]
 			other[Fuel] = addr[Fuel]
 		}
 	}
 
 	/* Travel here via Eden Warp Unit */
-	/* Silly: Dump Eden warp units */
+	for other[Edens] = addr[Edens] + 1; other[Edens] < dims[Edens]; other[Edens]++ {
+		for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
+			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+		}
+	}
+	other[Location] = addr[Location]
+	other[Edens] = addr[Edens]
+}
+
+func FillCellBySelling(data planet_data, dims []int, table []State, addr []int) {
+	if addr[Hold] > 0 {
+		// Can't sell and still have cargo
+		return
+	}
+	if addr[UnusedCargo] > 0 {
+		// Can't sell everything and still have 'unused' holds
+		return
+	}
+	my_index := EncodeIndex(dims, addr)
+	other := make([]int, NumDimensions)
+	copy(other, addr)
+	planet := data.i2p[addr[Location]]
+	for other[Hold] = 0; other[Hold] < dims[Hold]; other[Hold]++ {
+		commodity := data.i2c[other[Hold]]
+		if !data.Commodities[commodity].CanSell {
+			// TODO: Dump cargo
+			continue
+		}
+		relative_price, available := data.Planets[planet].RelativePrices[commodity]
+		if !available {
+			continue
+		}
+		base_price := data.Commodities[commodity].BasePrice
+		absolute_price := relative_price * base_price
+		sell_price := int(float64(absolute_price) * 0.9)
+
+		for other[UnusedCargo] = 0; other[UnusedCargo] < dims[UnusedCargo]; other[UnusedCargo]++ {
+
+			quantity := *hold - other[UnusedCargo] // TODO: Partial sales
+			sale_value := quantity * sell_price
+			UpdateCell(table, my_index, EncodeIndex(dims, other), sale_value)
+		}
+	}
+	other[UnusedCargo] = addr[UnusedCargo]
+}
+
+func FillCellByBuying(data planet_data, dims []int, table []State, addr []int) {
+	if addr[Hold] == 0 {
+		// Can't buy and then have nothing
+		return
+	}
+	my_index := EncodeIndex(dims, addr)
+	other := make([]int, NumDimensions)
+	copy(other, addr)
+	planet := data.i2p[addr[Location]]
+	commodity := data.i2c[addr[Hold]]
+	if !data.Commodities[commodity].CanSell {
+		return
+	}
+	relative_price, available := data.Planets[planet].RelativePrices[commodity]
+	if !available {
+		return
+	}
+	base_price := data.Commodities[commodity].BasePrice
+	absolute_price := relative_price * base_price
+	quantity := *hold - addr[UnusedCargo]
+	total_price := quantity * absolute_price
+	other[Hold] = 0
+	UpdateCell(table, my_index, EncodeIndex(dims, other), -total_price)
+}
+
+func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
 	/* Buy Eden warp units */
 	/* Buy a Device of Cloaking */
 	/* Silly: Dump a Device of Cloaking */
 	/* Buy Fighter Drones */
 	/* Buy Shield Batteries */
-	if addr[Hold] == 0 {
-		/* Sell or dump things */
-		// for commodity := range data.Commodities { }
-	} else {
-		/* Buy this thing */
-	}
 	/* Visit this planet */
 }
 
-func FillStateTable2(data planet_data, dims []int, table []State,
-fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
-	/* The dimension nesting order up to this point is important.
-	 * Beyond this point, it's not important.
-	 *
-	 * It is very important when iterating through the Hold dimension
-	 * to visit the null commodity (empty hold) first.  Visiting the
-	 * null commodity represents selling.  Visiting it first gets the
-	 * action order correct: arrive, sell, buy, leave.  Visiting the
-	 * null commodity after another commodity would evaluate the action
-	 * sequence: arrive, buy, sell, leave.  This is a useless action
-	 * sequence.  Because we visit the null commodity first, we do not
-	 * consider these action sequences.
-	 */
-	eden_capacity := data.Commodities["Eden Warp Units"].Limit
-	addr := make([]int, len(dims))
-	addr[Edens] = edens_remaining
-	addr[Fuel] = fuel_remaining
-	addr[Location] = data.p2i[planet]
+func FillStateTable2Iteration(data planet_data, dims []int, table []State,
+addr []int, f func(planet_data, []int, []State, []int)) {
+	/* TODO: Justify the safety of the combination of this dimension
+	 * iteration and the various phases f.  */
 	for addr[Hold] = 0; addr[Hold] < dims[Hold]; addr[Hold]++ {
 		for addr[Cloaks] = 0; addr[Cloaks] < dims[Cloaks]; addr[Cloaks]++ {
 			for addr[UnusedCargo] = 0; addr[UnusedCargo] < dims[UnusedCargo]; addr[UnusedCargo]++ {
-				if addr[Edens]+addr[Cloaks]+addr[UnusedCargo] <=
-					eden_capacity+1 {
-					for addr[NeedFighters] = 0; addr[NeedFighters] < dims[NeedFighters]; addr[NeedFighters]++ {
-						for addr[NeedShields] = 0; addr[NeedShields] < dims[NeedShields]; addr[NeedShields]++ {
-							for addr[Visit] = 0; addr[Visit] < dims[Visit]; addr[Visit]++ {
-								FillStateTableCell(data, dims, table, addr)
-							}
+				for addr[NeedFighters] = 0; addr[NeedFighters] < dims[NeedFighters]; addr[NeedFighters]++ {
+					for addr[NeedShields] = 0; addr[NeedShields] < dims[NeedShields]; addr[NeedShields]++ {
+						for addr[Visit] = 0; addr[Visit] < dims[Visit]; addr[Visit]++ {
+							f(data, dims, table, addr)
 						}
 					}
 				}
 			}
 		}
 	}
+}
+
+func FillStateTable2(data planet_data, dims []int, table []State,
+fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
+	addr := make([]int, len(dims))
+	addr[Edens] = edens_remaining
+	addr[Fuel] = fuel_remaining
+	addr[Location] = data.p2i[planet]
+	FillStateTable2Iteration(data, dims, table, addr, FillCellByArriving)
+	FillStateTable2Iteration(data, dims, table, addr, FillCellBySelling)
+	FillStateTable2Iteration(data, dims, table, addr, FillCellByBuying)
+	FillStateTable2Iteration(data, dims, table, addr, FillCellByMisc)
 	barrier <- true
 }
 
@@ -362,65 +436,6 @@ func FillStateTable1(data planet_data, dims []int, table []State) {
 	print("\n")
 }
 
-/* What is the value of hauling 'commodity' from 'from' to 'to'?
- * Take into account the available funds and the available cargo space. */
-func TradeValue(data planet_data,
-from, to Planet,
-commodity string,
-initial_funds, max_quantity int) int {
-	if !data.Commodities[commodity].CanSell {
-		return 0
-	}
-	from_relative_price, from_available := from.RelativePrices[commodity]
-	if !from_available {
-		return 0
-	}
-	to_relative_price, to_available := to.RelativePrices[commodity]
-	if !to_available {
-		return 0
-	}
-
-	base_price := data.Commodities[commodity].BasePrice
-	from_absolute_price := from_relative_price * base_price
-	to_absolute_price := to_relative_price * base_price
-	buy_price := from_absolute_price
-	sell_price := int(float64(to_absolute_price) * 0.9)
-	var can_afford int = initial_funds / buy_price
-	quantity := can_afford
-	if quantity > max_quantity {
-		quantity = max_quantity
-	}
-	return (sell_price - buy_price) * max_quantity
-}
-
-func FindBestTrades(data planet_data) [][]string {
-	// TODO: We can't cache this because this can change based on available funds.
-	best := make([][]string, len(data.Planets))
-	for from := range data.Planets {
-		best[data.p2i[from]] = make([]string, len(data.Planets))
-		for to := range data.Planets {
-			best_gain := 0
-			price_list := data.Planets[from].RelativePrices
-			if len(data.Planets[to].RelativePrices) < len(data.Planets[from].RelativePrices) {
-				price_list = data.Planets[to].RelativePrices
-			}
-			for commodity := range price_list {
-				gain := TradeValue(data,
-					data.Planets[from],
-					data.Planets[to],
-					commodity,
-					10000000,
-					1)
-				if gain > best_gain {
-					best[data.p2i[from]][data.p2i[to]] = commodity
-					gain = best_gain
-				}
-			}
-		}
-	}
-	return best
-}
-
 // (Example of a use case for generics in Go)
 func IndexPlanets(m *map[string]Planet, start_at int) (map[string]int, []string) {
 	e2i := make(map[string]int, len(*m)+start_at)
@@ -451,20 +466,8 @@ func main() {
 	data.p2i, data.i2p = IndexPlanets(&data.Planets, 0)
 	data.c2i, data.i2c = IndexCommodities(&data.Commodities, 1)
 	dims := DimensionSizes(data)
-	table := make([]State, StateTableSize(dims))
-	InitializeStateTable(data, dims, table)
+	table := InitializeStateTable(data, dims)
 	FillStateTable1(data, dims, table)
 	print("Going to print state table...")
 	fmt.Printf("%v", table)
-	best_trades := FindBestTrades(data)
-
-	for from := range data.Planets {
-		for to := range data.Planets {
-			best_trade := "(nothing)"
-			if best_trades[data.p2i[from]][data.p2i[to]] != "" {
-				best_trade = best_trades[data.p2i[from]][data.p2i[to]]
-			}
-			fmt.Printf("%s to %s: %s\n", from, to, best_trade)
-		}
-	}
 }
