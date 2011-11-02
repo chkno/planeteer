@@ -430,7 +430,7 @@ func FillStateTable1(data planet_data, dims []int, table []State) {
 				<-barrier
 			}
 			work_done++
-			fmt.Printf("\r%3.0f%%", 100*work_done/work_units)
+			print(fmt.Sprintf("\r%3.0f%%", 100*work_done/work_units))
 		}
 	}
 	print("\n")
@@ -456,9 +456,21 @@ func FindBestState(data planet_data, dims []int, table []State) int {
 	return max_index
 }
 
+func Commas(n int) (s string) {
+	r := n % 1000
+	n /= 1000
+	for n > 0 {
+		s = fmt.Sprintf(",%03d", r) + s
+		r = n % 1000
+		n /= 1000
+	}
+	s = fmt.Sprint(r) + s
+	return
+}
+
 func DescribePath(data planet_data, dims []int, table []State, start int) (description []string) {
 	for index := start; index > 0 && table[index].from > 0; index = table[index].from {
-		line := fmt.Sprintf("%10v", table[index].value)
+		line := fmt.Sprintf("%13v", Commas(table[index].value))
 		addr := DecodeIndex(dims, index)
 		prev := DecodeIndex(dims, table[index].from)
 		if addr[Location] != prev[Location] {
@@ -526,6 +538,6 @@ func main() {
 		best, DecodeIndex(dims, best), table[best].value)
 	description := DescribePath(data, dims, table, best)
 	for i := len(description) - 1; i >= 0; i-- {
-		print(description[i], "\n")
+		fmt.Println(description[i])
 	}
 }
