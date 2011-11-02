@@ -178,7 +178,7 @@ func DimensionSizes(data planet_data) []int {
 	dims[UnusedCargo] = eden_capacity + cloak_capacity + 1
 	dims[Fuel] = *fuel + 1
 	dims[Location] = len(data.Planets)
-	dims[Hold] = len(data.Commodities)
+	dims[Hold] = len(data.Commodities) + 1
 	dims[NeedFighters] = bint(*drones > 0) + 1
 	dims[NeedShields] = bint(*batteries > 0) + 1
 	dims[Visit] = 1 << uint(len(visit()))
