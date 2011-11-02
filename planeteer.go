@@ -456,6 +456,39 @@ func FindBestState(data planet_data, dims []int, table []State) int {
 	return max_index
 }
 
+func DescribePath(data planet_data, dims []int, table []State, start int) (description []string) {
+	for index := start; index > 0 && table[index].from > 0; index = table[index].from {
+		line := fmt.Sprintf("%10v", table[index].value)
+		addr := DecodeIndex(dims, index)
+		prev := DecodeIndex(dims, table[index].from)
+		if addr[Location] != prev[Location] {
+			from := data.i2p[prev[Location]]
+			to := data.i2p[addr[Location]]
+			if addr[Fuel] != prev[Fuel] {
+				line += fmt.Sprintf(" Jump from %v to %v (%v reactor units)", from, to, prev[Fuel]-addr[Fuel])
+			} else if addr[Edens] != prev[Edens] {
+				line += fmt.Sprintf(" Eden warp from %v to %v", from, to)
+			} else {
+				panic("Traveling without fuel?")
+			}
+		}
+		if addr[Hold] != prev[Hold] {
+			if addr[Hold] == 0 {
+				quantity := *hold - (prev[UnusedCargo] + prev[Edens] + prev[Cloaks])
+				line += fmt.Sprintf(" Sell %v %v", quantity, data.i2c[prev[Hold]])
+			} else if prev[Hold] == 0 {
+				quantity := *hold - (addr[UnusedCargo] + addr[Edens] + addr[Cloaks])
+				line += fmt.Sprintf(" Buy %v %v", quantity, data.i2c[addr[Hold]])
+			} else {
+				panic("Switched cargo?")
+			}
+
+		}
+		description = append(description, line)
+	}
+	return
+}
+
 // (Example of a use case for generics in Go)
 func IndexPlanets(m *map[string]Planet, start_at int) (map[string]int, []string) {
 	e2i := make(map[string]int, len(*m)+start_at)
@@ -491,4 +524,8 @@ func main() {
 	best := FindBestState(data, dims, table)
 	fmt.Printf("Best state: %v (%v) with $%v\n",
 		best, DecodeIndex(dims, best), table[best].value)
+	description := DescribePath(data, dims, table, best)
+	for i := len(description) - 1; i >= 0; i-- {
+		print(description[i], "\n")
+	}
 }
