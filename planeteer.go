@@ -319,8 +319,8 @@ func FillCellBySelling(data planet_data, dims []int, table []State, addr []int) 
 			continue
 		}
 		base_price := data.Commodities[commodity].BasePrice
-		absolute_price := relative_price * base_price
-		sell_price := int(float64(absolute_price) * 0.9)
+		absolute_price := float64(base_price) * float64(relative_price) / 100.0
+		sell_price := int(absolute_price * 0.9)
 
 		for other[UnusedCargo] = 0; other[UnusedCargo] < dims[UnusedCargo]; other[UnusedCargo]++ {
 
@@ -350,7 +350,7 @@ func FillCellByBuying(data planet_data, dims []int, table []State, addr []int) {
 		return
 	}
 	base_price := data.Commodities[commodity].BasePrice
-	absolute_price := relative_price * base_price
+	absolute_price := int(float64(base_price) * float64(relative_price) / 100.0)
 	quantity := *hold - addr[UnusedCargo]
 	total_price := quantity * absolute_price
 	other[Hold] = 0
