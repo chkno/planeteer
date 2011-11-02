@@ -436,6 +436,26 @@ func FillStateTable1(data planet_data, dims []int, table []State) {
 	print("\n")
 }
 
+func FindBestState(data planet_data, dims []int, table []State) int {
+	addr := make([]int, NumDimensions)
+	addr[Edens] = *end_edens
+	addr[Cloaks] = dims[Cloaks] - 1
+	addr[NeedFighters] = dims[NeedFighters] - 1
+	addr[NeedShields] = dims[NeedShields] - 1
+	addr[Visit] = dims[Visit] - 1
+	// Fuel, Hold, UnusedCargo left at 0
+	var max_index int
+	max_value := 0
+	for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
+		index := EncodeIndex(dims, addr)
+		if table[index].value > max_value {
+			max_value = table[index].value
+			max_index = index
+		}
+	}
+	return max_index
+}
+
 // (Example of a use case for generics in Go)
 func IndexPlanets(m *map[string]Planet, start_at int) (map[string]int, []string) {
 	e2i := make(map[string]int, len(*m)+start_at)
@@ -468,6 +488,7 @@ func main() {
 	dims := DimensionSizes(data)
 	table := InitializeStateTable(data, dims)
 	FillStateTable1(data, dims, table)
-	print("Going to print state table...")
-	fmt.Printf("%v", table)
+	best := FindBestState(data, dims, table)
+	fmt.Printf("Best state: %v (%v) with $%v\n",
+		best, DecodeIndex(dims, best), table[best].value)
 }
