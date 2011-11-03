@@ -324,7 +324,7 @@ func FillCellBySelling(data planet_data, dims []int, table []State, addr []int) 
 
 		for other[UnusedCargo] = 0; other[UnusedCargo] < dims[UnusedCargo]; other[UnusedCargo]++ {
 
-			quantity := *hold - other[UnusedCargo] // TODO: Partial sales
+			quantity := *hold - (other[UnusedCargo] + other[Cloaks] + other[Edens])
 			sale_value := quantity * sell_price
 			UpdateCell(table, my_index, EncodeIndex(dims, other), sale_value)
 		}
@@ -351,15 +351,29 @@ func FillCellByBuying(data planet_data, dims []int, table []State, addr []int) {
 	}
 	base_price := data.Commodities[commodity].BasePrice
 	absolute_price := int(float64(base_price) * float64(relative_price) / 100.0)
-	quantity := *hold - addr[UnusedCargo]
+	quantity := *hold - (addr[UnusedCargo] + addr[Cloaks] + addr[Edens])
 	total_price := quantity * absolute_price
 	other[Hold] = 0
 	UpdateCell(table, my_index, EncodeIndex(dims, other), -total_price)
 }
 
 func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
+	my_index := EncodeIndex(dims, addr)
+	other := make([]int, NumDimensions)
+	copy(other, addr)
 	/* Buy Eden warp units */
 	/* Buy a Device of Cloaking */
+	if addr[Cloaks] == 1 && addr[UnusedCargo] < dims[UnusedCargo]-1 {
+		relative_price, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Device Of Cloakings"]
+		if available {
+			absolute_price := int(float64(data.Commodities["Device Of Cloakings"].BasePrice) * float64(relative_price) / 100.0)
+			other[Cloaks] = 0
+			other[UnusedCargo] = addr[UnusedCargo] + 1
+			UpdateCell(table, my_index, EncodeIndex(dims, other), -absolute_price)
+			other[UnusedCargo] = addr[UnusedCargo]
+			other[Cloaks] = addr[Cloaks]
+		}
+	}
 	/* Silly: Dump a Device of Cloaking */
 	/* Buy Fighter Drones */
 	/* Buy Shield Batteries */
@@ -444,7 +458,7 @@ func FindBestState(data planet_data, dims []int, table []State) int {
 	addr[NeedShields] = dims[NeedShields] - 1
 	addr[Visit] = dims[Visit] - 1
 	// Fuel, Hold, UnusedCargo left at 0
-	var max_index int
+	max_index := -1
 	max_value := 0
 	for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
 		index := EncodeIndex(dims, addr)
@@ -534,10 +548,14 @@ func main() {
 	table := InitializeStateTable(data, dims)
 	FillStateTable1(data, dims, table)
 	best := FindBestState(data, dims, table)
-	fmt.Printf("Best state: %v (%v) with $%v\n",
-		best, DecodeIndex(dims, best), table[best].value)
-	description := DescribePath(data, dims, table, best)
-	for i := len(description) - 1; i >= 0; i-- {
-		fmt.Println(description[i])
+	if best == -1 {
+		print("Cannot acheive success criteria\n")
+	} else {
+		fmt.Printf("Best state: %v (%v) with $%v\n",
+			best, DecodeIndex(dims, best), Commas(table[best].value))
+		description := DescribePath(data, dims, table, best)
+		for i := len(description) - 1; i >= 0; i-- {
+			fmt.Println(description[i])
+		}
 	}
 }
