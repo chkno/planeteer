@@ -509,27 +509,26 @@ func Commas(n int) (s string) {
 
 func DescribePath(data planet_data, dims []int, table []State, start int) (description []string) {
 	for index := start; index > 0 && table[index].from > 0; index = table[index].from {
-		line := fmt.Sprintf("%13v", Commas(table[index].value))
+		var line string
 		addr := DecodeIndex(dims, index)
 		prev := DecodeIndex(dims, table[index].from)
-		if addr[Location] != prev[Location] {
+		if addr[Fuel] != prev[Fuel] {
 			from := data.i2p[prev[Location]]
 			to := data.i2p[addr[Location]]
-			if addr[Fuel] != prev[Fuel] {
-				line += fmt.Sprintf(" Jump from %v to %v (%v reactor units)", from, to, prev[Fuel]-addr[Fuel])
-			} else if addr[Edens] != prev[Edens] {
-				line += fmt.Sprintf(" Eden warp from %v to %v", from, to)
-			} else {
-				panic("Traveling without fuel?")
-			}
+			line += fmt.Sprintf("Jump from %v to %v (%v reactor units)", from, to, prev[Fuel]-addr[Fuel])
+		}
+		if addr[Edens] != prev[Edens] {
+			from := data.i2p[prev[Location]]
+			to := data.i2p[addr[Location]]
+			line += fmt.Sprintf("Eden warp from %v to %v", from, to)
 		}
 		if addr[Hold] != prev[Hold] {
 			if addr[Hold] == 0 {
 				quantity := *hold - (prev[UnusedCargo] + prev[Edens] + prev[Cloaks])
-				line += fmt.Sprintf(" Sell %v %v", quantity, data.i2c[prev[Hold]])
+				line += fmt.Sprintf("Sell %v %v", quantity, data.i2c[prev[Hold]])
 			} else if prev[Hold] == 0 {
 				quantity := *hold - (addr[UnusedCargo] + addr[Edens] + addr[Cloaks])
-				line += fmt.Sprintf(" Buy %v %v", quantity, data.i2c[addr[Hold]])
+				line += fmt.Sprintf("Buy %v %v", quantity, data.i2c[addr[Hold]])
 			} else {
 				panic("Switched cargo?")
 			}
@@ -537,9 +536,15 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 		}
 		if addr[Cloaks] == 1 && prev[Cloaks] == 0 {
 			// TODO: Dump cloaks, convert from cargo?
-			line += " Buy a Cloak"
+			line += "Buy a Cloak"
 		}
-		description = append(description, line)
+		if addr[Edens] != prev[Edens] {
+			line += fmt.Sprint("Buy ", addr[Edens] - prev[Edens], " Eden Warp Units")
+		}
+		if line == "" {
+			line = fmt.Sprint(prev, " -> ", addr)
+		}
+		description = append(description, fmt.Sprintf("%13v ", Commas(table[index].value)) + line)
 	}
 	return
 }
