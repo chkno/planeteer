@@ -77,7 +77,7 @@ func end() map[string]bool {
 		return nil
 	}
 	m := make(map[string]bool)
-	for _, p := range strings.Split(*flight_plan_string, ",") {
+	for _, p := range strings.Split(*end_string, ",") {
 		m[p] = true
 	}
 	return m
@@ -484,10 +484,12 @@ func FindBestState(data planet_data, dims []int, table []State) int {
 	max_index := -1
 	max_value := 0
 	for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
-		index := EncodeIndex(dims, addr)
-		if table[index].value > max_value {
-			max_value = table[index].value
-			max_index = index
+		if len(end()) == 0 || end()[data.i2p[addr[Location]]] {
+			index := EncodeIndex(dims, addr)
+			if table[index].value > max_value {
+				max_value = table[index].value
+				max_index = index
+			}
 		}
 	}
 	return max_index
