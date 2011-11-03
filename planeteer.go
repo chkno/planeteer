@@ -276,10 +276,11 @@ func FillCellByArriving(data planet_data, dims []int, table []State, addr []int)
 	/* Travel here via a hidey hole */
 	if addr[Fuel]+1 < dims[Fuel] {
 		hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 1)
-		if hole_index < len(flight_plan()) {
+		if hole_index < len(flight_plan()) && addr[Location] == data.p2i[flight_plan()[hole_index]] {
 			other[Fuel] = addr[Fuel] + 1
-			other[Location] = data.p2i[flight_plan()[hole_index]]
-			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+			for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
+				UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+			}
 			other[Location] = addr[Location]
 			other[Fuel] = addr[Fuel]
 		}
