@@ -371,7 +371,9 @@ func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
 		if available {
 			absolute_price := int(float64(data.Commodities["Device Of Cloakings"].BasePrice) * float64(relative_price) / 100.0)
 			other[Cloaks] = 0
-			other[UnusedCargo] = addr[UnusedCargo] + 1
+			if other[Hold] != 0 {
+				other[UnusedCargo] = addr[UnusedCargo] + 1
+			}
 			UpdateCell(table, my_index, EncodeIndex(dims, other), -absolute_price)
 			other[UnusedCargo] = addr[UnusedCargo]
 			other[Cloaks] = addr[Cloaks]
@@ -513,6 +515,10 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 			}
 
 		}
+		if addr[Cloaks] == 1 && prev[Cloaks] == 0 {
+			// TODO: Dump cloaks, convert from cargo?
+			line += " Buy a Cloak"
+		}
 		description = append(description, line)
 	}
 	return
@@ -554,8 +560,6 @@ func main() {
 	if best == -1 {
 		print("Cannot acheive success criteria\n")
 	} else {
-		fmt.Printf("Best state: %v (%v) with $%v\n",
-			best, DecodeIndex(dims, best), Commas(table[best].value))
 		description := DescribePath(data, dims, table, best)
 		for i := len(description) - 1; i >= 0; i-- {
 			fmt.Println(description[i])
