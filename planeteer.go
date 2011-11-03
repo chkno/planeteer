@@ -300,13 +300,17 @@ func FillCellByArriving(data planet_data, dims []int, table []State, addr []int)
 	}
 
 	/* Travel here via Eden Warp Unit */
-	for other[Edens] = addr[Edens] + 1; other[Edens] < dims[Edens]; other[Edens]++ {
-		for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
-			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+	if addr[Edens]+1 < dims[Edens] {
+		_, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Eden Warp Units"]
+		if !available {
+			other[Edens] = addr[Edens] + 1
+			for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
+				UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+			}
+			other[Location] = addr[Location]
+			other[Edens] = addr[Edens]
 		}
 	}
-	other[Location] = addr[Location]
-	other[Edens] = addr[Edens]
 }
 
 func FillCellBySelling(data planet_data, dims []int, table []State, addr []int) {
