@@ -354,7 +354,10 @@ func FillCellByBuying(data planet_data, dims []int, table []State, addr []int) {
 	quantity := *hold - (addr[UnusedCargo] + addr[Cloaks] + addr[Edens])
 	total_price := quantity * absolute_price
 	other[Hold] = 0
+	other[UnusedCargo] = 0
 	UpdateCell(table, my_index, EncodeIndex(dims, other), -total_price)
+	other[UnusedCargo] = addr[UnusedCargo]
+	other[Hold] = addr[Hold]
 }
 
 func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
