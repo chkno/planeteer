@@ -32,7 +32,7 @@ var start = flag.String("start", "",
 var flight_plan_string = flag.String("flight_plan", "",
 	"Your hidey-holes for the day, comma-separated.")
 
-var end = flag.String("end", "",
+var end_string = flag.String("end", "",
 	"A comma-separated list of acceptable ending planets.")
 
 var planet_data_file = flag.String("planet_data_file", "planet-data",
@@ -60,16 +60,27 @@ var visit_string = flag.String("visit", "",
 
 func visit() []string {
 	if *visit_string == "" {
-		return []string{}
+		return nil
 	}
 	return strings.Split(*visit_string, ",")
 }
 
 func flight_plan() []string {
 	if *flight_plan_string == "" {
-		return []string{}
+		return nil
 	}
 	return strings.Split(*flight_plan_string, ",")
+}
+
+func end() map[string]bool {
+	if *end_string == "" {
+		return nil
+	}
+	m := make(map[string]bool)
+	for _, p := range strings.Split(*flight_plan_string, ",") {
+		m[p] = true
+	}
+	return m
 }
 
 type Commodity struct {
