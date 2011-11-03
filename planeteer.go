@@ -278,7 +278,9 @@ func FillCellByArriving(data planet_data, dims []int, table []State, addr []int)
 	if addr[Fuel]+2 < dims[Fuel] {
 		other[Fuel] = addr[Fuel] + 2
 		for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
-			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+			if data.Planets[data.i2p[addr[Location]]].BeaconOn {
+				UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+			}
 		}
 		other[Location] = addr[Location]
 		other[Fuel] = addr[Fuel]
