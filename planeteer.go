@@ -382,7 +382,7 @@ func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
 	my_index := EncodeIndex(dims, addr)
 	other := make([]int, NumDimensions)
 	copy(other, addr)
-	/* Buy Eden warp units */
+
 	/* Buy a Device of Cloaking */
 	if addr[Cloaks] == 1 && addr[UnusedCargo] < dims[UnusedCargo]-1 {
 		relative_price, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Device Of Cloakings"]
@@ -401,6 +401,32 @@ func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
 	/* Buy Fighter Drones */
 	/* Buy Shield Batteries */
 	/* Visit this planet */
+}
+
+func FillCellByBuyingEdens(data planet_data, dims []int, table []State, addr []int) {
+	my_index := EncodeIndex(dims, addr)
+	other := make([]int, NumDimensions)
+	copy(other, addr)
+
+	/* Buy Eden warp units */
+	eden_limit := data.Commodities["Eden Warp Units"].Limit
+	if addr[Edens] > 0 && addr[Edens] <= eden_limit {
+		relative_price, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Eden Warp Units"]
+		if available {
+			absolute_price := int(float64(data.Commodities["Eden Warp Units"].BasePrice) * float64(relative_price) / 100.0)
+			for quantity := addr[Edens]; quantity > 0; quantity-- {
+				other[Edens] = addr[Edens] - quantity
+				if addr[Hold] != 0 {
+					other[UnusedCargo] = addr[UnusedCargo] + quantity
+				}
+				if other[UnusedCargo] < dims[UnusedCargo] {
+					UpdateCell(table, my_index, EncodeIndex(dims, other), -absolute_price * quantity)
+				}
+			}
+			other[Edens] = addr[Edens]
+			other[UnusedCargo] = addr[UnusedCargo]
+		}
+	}
 }
 
 func FillStateTable2Iteration(data planet_data, dims []int, table []State,
@@ -423,11 +449,7 @@ addr []int, f func(planet_data, []int, []State, []int)) {
 }
 
 func FillStateTable2(data planet_data, dims []int, table []State,
-fuel_remaining, edens_remaining int, planet string, barrier chan<- bool) {
-	addr := make([]int, len(dims))
-	addr[Edens] = edens_remaining
-	addr[Fuel] = fuel_remaining
-	addr[Location] = data.p2i[planet]
+addr []int, barrier chan<- bool) {
 	FillStateTable2Iteration(data, dims, table, addr, FillCellByArriving)
 	FillStateTable2Iteration(data, dims, table, addr, FillCellBySelling)
 	FillStateTable2Iteration(data, dims, table, addr, FillCellByBuying)
@@ -459,15 +481,28 @@ func FillStateTable1(data planet_data, dims []int, table []State) {
 	work_done := 0.0
 	for fuel_remaining := *fuel; fuel_remaining >= 0; fuel_remaining-- {
 		for edens_remaining := eden_capacity; edens_remaining >= 0; edens_remaining-- {
+			/* Do the brunt of the work */
 			for planet := range data.Planets {
-				go FillStateTable2(data, dims, table, fuel_remaining,
-					edens_remaining, planet, barrier)
+				addr := make([]int, len(dims))
+				addr[Edens] = edens_remaining
+				addr[Fuel] = fuel_remaining
+				addr[Location] = data.p2i[planet]
+				go FillStateTable2(data, dims, table, addr, barrier)
 			}
 			for _ = range data.Planets {
 				<-barrier
 			}
 			work_done++
 			print(fmt.Sprintf("\r%3.0f%%", 100*work_done/work_units))
+		}
+		/* Make an Eden-buying pass (uphill) */
+		addr := make([]int, len(dims))
+		addr[Fuel] = fuel_remaining
+		for addr[Edens] = 0; addr[Edens] <= eden_capacity; addr[Edens]++ {
+			for planet := range data.Planets {
+				addr[Location] = data.p2i[planet]
+				FillStateTable2Iteration(data, dims, table, addr, FillCellByBuyingEdens)
+			}
 		}
 	}
 	print("\n")
@@ -517,7 +552,7 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 			to := data.i2p[addr[Location]]
 			line += fmt.Sprintf("Jump from %v to %v (%v reactor units)", from, to, prev[Fuel]-addr[Fuel])
 		}
-		if addr[Edens] != prev[Edens] {
+		if addr[Edens] == prev[Edens] - 1 {
 			from := data.i2p[prev[Location]]
 			to := data.i2p[addr[Location]]
 			line += fmt.Sprintf("Eden warp from %v to %v", from, to)
@@ -538,7 +573,7 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 			// TODO: Dump cloaks, convert from cargo?
 			line += "Buy a Cloak"
 		}
-		if addr[Edens] != prev[Edens] {
+		if addr[Edens] > prev[Edens] {
 			line += fmt.Sprint("Buy ", addr[Edens] - prev[Edens], " Eden Warp Units")
 		}
 		if line == "" {
