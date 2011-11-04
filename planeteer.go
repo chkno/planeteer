@@ -221,7 +221,7 @@ func EncodeIndex(dims, addr []int) int {
 		panic(0)
 	}
 	for i := 1; i < NumDimensions; i++ {
-		if addr[i] > dims[i] {
+		if addr[i] < 0 || addr[i] > dims[i] {
 			panic(i)
 		}
 		index = index*dims[i] + addr[i]
@@ -300,14 +300,16 @@ func FillCellByArriving(data planet_data, dims []int, table []State, addr []int)
 	}
 
 	/* Travel here via Eden Warp Unit */
-	if addr[Edens]+1 < dims[Edens] {
+	if addr[Edens]+1 < dims[Edens] && addr[UnusedCargo] > 1 {
 		_, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Eden Warp Units"]
 		if !available {
 			other[Edens] = addr[Edens] + 1
+			other[UnusedCargo] = addr[UnusedCargo] - 1
 			for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
 				UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
 			}
 			other[Location] = addr[Location]
+			other[UnusedCargo] = addr[UnusedCargo]
 			other[Edens] = addr[Edens]
 		}
 	}
