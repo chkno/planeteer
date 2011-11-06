@@ -30,7 +30,7 @@ var start = flag.String("start", "",
 	"The planet to start at")
 
 var flight_plan_string = flag.String("flight_plan", "",
-	"Your hidey-holes for the day, comma-separated.")
+	"Your hyper-holes for the day, comma-separated.")
 
 var end_string = flag.String("end", "",
 	"A comma-separated list of acceptable ending planets.")
@@ -38,7 +38,7 @@ var end_string = flag.String("end", "",
 var planet_data_file = flag.String("planet_data_file", "planet-data",
 	"The file to read planet data from")
 
-var fuel = flag.Int("fuel", 16, "Reactor units")
+var fuel = flag.Int("fuel", 16, "Hyper Jump power left")
 
 var hold = flag.Int("hold", 300, "Size of your cargo hold")
 
@@ -160,7 +160,7 @@ const (
 	Edens        = iota //   1     3  # of Eden warp units (0 - 2 typically)
 	Cloaks              //   2     2  # of Devices of Cloaking (0 or 1)
 	UnusedCargo         //   3     4  # of unused cargo spaces (0 - 3 typically)
-	Fuel                //   4    17  Reactor power left (0 - 16)
+	Fuel                //   4    17  Hyper jump power left (0 - 16)
 	Location            //   5    26  Location (which planet)
 	Hold                //   6    15  Cargo bay contents (a *Commodity or nil)
 	NeedFighters        //   7     2  Errand: Buy fighter drones (needed or not)
@@ -286,7 +286,7 @@ func FillCellByArriving(data planet_data, dims []int, table []State, addr []int)
 		other[Fuel] = addr[Fuel]
 	}
 
-	/* Travel here via a hidey hole */
+	/* Travel here via a hyper hole */
 	if addr[Fuel]+1 < dims[Fuel] {
 		hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 1)
 		if hole_index < len(flight_plan()) && addr[Location] == data.p2i[flight_plan()[hole_index]] {
@@ -552,7 +552,7 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 		if addr[Fuel] != prev[Fuel] {
 			from := data.i2p[prev[Location]]
 			to := data.i2p[addr[Location]]
-			line += fmt.Sprintf("Jump from %v to %v (%v reactor units)", from, to, prev[Fuel]-addr[Fuel])
+			line += fmt.Sprintf("Jump from %v to %v (%v hyper jump units)", from, to, prev[Fuel]-addr[Fuel])
 		}
 		if addr[Edens] == prev[Edens] - 1 {
 			from := data.i2p[prev[Location]]
