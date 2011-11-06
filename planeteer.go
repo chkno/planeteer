@@ -55,6 +55,10 @@ var drones = flag.Int("drones", 0, "Buy this many Fighter Drones")
 
 var batteries = flag.Int("batteries", 0, "Buy this many Shield Batterys")
 
+var drone_price = flag.Int("drone_price", 0, "Today's Fighter Drone price")
+
+var battery_price = flag.Int("battery_price", 0, "Today's Shield Battery price")
+
 var visit_string = flag.String("visit", "",
 	"A comma-separated list of planets to make sure to visit")
 
@@ -163,8 +167,8 @@ const (
 	Fuel                //   4    17  Hyper jump power left (0 - 16)
 	Location            //   5    26  Location (which planet)
 	Hold                //   6    15  Cargo bay contents (a *Commodity or nil)
-	NeedFighters        //   7     2  Errand: Buy fighter drones (needed or not)
-	NeedShields         //   8     2  Errand: Buy shield batteries (needed or not)
+	BuyFighters         //   7     2  Errand: Buy fighter drones
+	BuyShields          //   8     2  Errand: Buy shield batteries
 	Visit               //   9  2**N  Visit: Stop by these N planets in the route
 
 	NumDimensions
@@ -190,8 +194,8 @@ func DimensionSizes(data planet_data) []int {
 	dims[Fuel] = *fuel + 1
 	dims[Location] = len(data.Planets)
 	dims[Hold] = len(data.Commodities) + 1
-	dims[NeedFighters] = bint(*drones > 0) + 1
-	dims[NeedShields] = bint(*batteries > 0) + 1
+	dims[BuyFighters] = bint(*drones > 0) + 1
+	dims[BuyShields] = bint(*batteries > 0) + 1
 	dims[Visit] = 1 << uint(len(visit()))
 
 	// Remind myself to add a line above when adding new dimensions
@@ -399,10 +403,33 @@ func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
 			other[Cloaks] = addr[Cloaks]
 		}
 	}
+
 	/* Silly: Dump a Device of Cloaking */
+
 	/* Buy Fighter Drones */
+	if addr[BuyFighters] == 1 {
+		relative_price, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Fighter Drones"]
+		if available {
+			absolute_price := int(float64(data.Commodities["Fighter Drones"].BasePrice) * float64(relative_price) / 100.0)
+			other[BuyFighters] = 0
+			UpdateCell(table, my_index, EncodeIndex(dims, other), -absolute_price * *drones)
+			other[BuyFighters] = addr[BuyFighters]
+		}
+	}
+
 	/* Buy Shield Batteries */
+	if addr[BuyShields] == 1 {
+		relative_price, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Shield Batterys"]
+		if available {
+			absolute_price := int(float64(data.Commodities["Shield Batterys"].BasePrice) * float64(relative_price) / 100.0)
+			other[BuyShields] = 0
+			UpdateCell(table, my_index, EncodeIndex(dims, other), -absolute_price * *batteries)
+			other[BuyShields] = addr[BuyShields]
+		}
+	}
+
 	/* Visit this planet */
+
 }
 
 func FillCellByBuyingEdens(data planet_data, dims []int, table []State, addr []int) {
@@ -438,8 +465,8 @@ addr []int, f func(planet_data, []int, []State, []int)) {
 	for addr[Hold] = 0; addr[Hold] < dims[Hold]; addr[Hold]++ {
 		for addr[Cloaks] = 0; addr[Cloaks] < dims[Cloaks]; addr[Cloaks]++ {
 			for addr[UnusedCargo] = 0; addr[UnusedCargo] < dims[UnusedCargo]; addr[UnusedCargo]++ {
-				for addr[NeedFighters] = 0; addr[NeedFighters] < dims[NeedFighters]; addr[NeedFighters]++ {
-					for addr[NeedShields] = 0; addr[NeedShields] < dims[NeedShields]; addr[NeedShields]++ {
+				for addr[BuyFighters] = 0; addr[BuyFighters] < dims[BuyFighters]; addr[BuyFighters]++ {
+					for addr[BuyShields] = 0; addr[BuyShields] < dims[BuyShields]; addr[BuyShields]++ {
 						for addr[Visit] = 0; addr[Visit] < dims[Visit]; addr[Visit]++ {
 							f(data, dims, table, addr)
 						}
@@ -514,8 +541,8 @@ func FindBestState(data planet_data, dims []int, table []State) int {
 	addr := make([]int, NumDimensions)
 	addr[Edens] = *end_edens
 	addr[Cloaks] = dims[Cloaks] - 1
-	addr[NeedFighters] = dims[NeedFighters] - 1
-	addr[NeedShields] = dims[NeedShields] - 1
+	addr[BuyFighters] = dims[BuyFighters] - 1
+	addr[BuyShields] = dims[BuyShields] - 1
 	addr[Visit] = dims[Visit] - 1
 	// Fuel, Hold, UnusedCargo left at 0
 	max_index := -1
@@ -578,6 +605,12 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 		if addr[Edens] > prev[Edens] {
 			line += fmt.Sprint("Buy ", addr[Edens] - prev[Edens], " Eden Warp Units")
 		}
+		if addr[BuyShields] == 1 && prev[BuyShields] == 0 {
+			line += fmt.Sprint("Buy ", *batteries, " Shield Batterys")
+		}
+		if addr[BuyFighters] == 1 && prev[BuyFighters] == 0 {
+			line += fmt.Sprint("Buy ", *drones, " Fighter Drones")
+		}
 		if line == "" {
 			line = fmt.Sprint(prev, " -> ", addr)
 		}
@@ -613,6 +646,16 @@ func IndexCommodities(m *map[string]Commodity, start_at int) (map[string]int, []
 func main() {
 	flag.Parse()
 	data := ReadData()
+	if *drone_price > 0 {
+		temp := data.Commodities["Fighter Drones"]
+		temp.BasePrice = *drone_price
+		data.Commodities["Fighter Drones"] = temp
+	}
+	if *battery_price > 0 {
+		temp := data.Commodities["Shield Batterys"]
+		temp.BasePrice = *battery_price
+		data.Commodities["Shield Batterys"] = temp
+	}
 	data.p2i, data.i2p = IndexPlanets(&data.Planets, 0)
 	data.c2i, data.i2c = IndexCommodities(&data.Commodities, 1)
 	dims := DimensionSizes(data)
