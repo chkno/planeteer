@@ -483,7 +483,10 @@ addr []int, barrier chan<- bool) {
 	FillStateTable2Iteration(data, dims, table, addr, FillCellBySelling)
 	FillStateTable2Iteration(data, dims, table, addr, FillCellByBuying)
 	FillStateTable2Iteration(data, dims, table, addr, FillCellByMisc)
-	barrier <- true
+	FillStateTable2Iteration(data, dims, table, addr, FillCellByBuyingEdens)
+	if barrier != nil {
+		barrier <- true
+	}
 }
 
 /* Filling the state table is a set of nested for loops NumDimensions deep.
@@ -509,6 +512,19 @@ func FillStateTable1(data planet_data, dims []int, table []State) {
 	work_units := (float64(*fuel) + 1) * (float64(eden_capacity) + 1)
 	work_done := 0.0
 	for fuel_remaining := *fuel; fuel_remaining >= 0; fuel_remaining-- {
+		/* Make an Eden-buying pass (Eden vendors' energy gradient
+		 * along the Edens dimension runs backwards) */
+		for edens_remaining := 0; edens_remaining <= eden_capacity; edens_remaining++ {
+			for planet := range data.Planets {
+				if _, available := data.Planets[planet].RelativePrices["Eden Warp Units"]; available {
+					addr := make([]int, len(dims))
+					addr[Edens] = edens_remaining
+					addr[Fuel] = fuel_remaining
+					addr[Location] = data.p2i[planet]
+					FillStateTable2(data, dims, table, addr, nil)
+				}
+			}
+		}
 		for edens_remaining := eden_capacity; edens_remaining >= 0; edens_remaining-- {
 			/* Do the brunt of the work */
 			for planet := range data.Planets {
@@ -523,15 +539,6 @@ func FillStateTable1(data planet_data, dims []int, table []State) {
 			}
 			work_done++
 			print(fmt.Sprintf("\r%3.0f%%", 100*work_done/work_units))
-		}
-		/* Make an Eden-buying pass (uphill) */
-		addr := make([]int, len(dims))
-		addr[Fuel] = fuel_remaining
-		for addr[Edens] = 0; addr[Edens] <= eden_capacity; addr[Edens]++ {
-			for planet := range data.Planets {
-				addr[Location] = data.p2i[planet]
-				FillStateTable2Iteration(data, dims, table, addr, FillCellByBuyingEdens)
-			}
 		}
 	}
 	print("\n")
