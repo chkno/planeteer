@@ -21,6 +21,7 @@ import "flag"
 import "fmt"
 import "json"
 import "os"
+import "runtime/pprof"
 import "strings"
 
 var funds = flag.Int("funds", 0,
@@ -62,29 +63,44 @@ var battery_price = flag.Int("battery_price", 0, "Today's Shield Battery price")
 var visit_string = flag.String("visit", "",
 	"A comma-separated list of planets to make sure to visit")
 
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+
+
+var visit_cache []string
 func visit() []string {
-	if *visit_string == "" {
-		return nil
+	if visit_cache == nil {
+		if *visit_string == "" {
+			return nil
+		}
+		visit_cache = strings.Split(*visit_string, ",")
 	}
-	return strings.Split(*visit_string, ",")
+	return visit_cache
 }
 
+var flight_plan_cache []string
 func flight_plan() []string {
-	if *flight_plan_string == "" {
-		return nil
+	if flight_plan_cache == nil {
+		if *flight_plan_string == "" {
+			return nil
+		}
+		flight_plan_cache = strings.Split(*flight_plan_string, ",")
 	}
-	return strings.Split(*flight_plan_string, ",")
+	return flight_plan_cache
 }
 
+var end_cache map[string]bool
 func end() map[string]bool {
-	if *end_string == "" {
-		return nil
+	if end_cache == nil {
+		if *end_string == "" {
+			return nil
+		}
+		m := make(map[string]bool)
+		for _, p := range strings.Split(*end_string, ",") {
+			m[p] = true
+		}
+		end_cache = m
 	}
-	m := make(map[string]bool)
-	for _, p := range strings.Split(*end_string, ",") {
-		m[p] = true
-	}
-	return m
+	return end_cache
 }
 
 type Commodity struct {
@@ -664,6 +680,14 @@ func IndexCommodities(m *map[string]Commodity, start_at int) (map[string]int, []
 
 func main() {
 	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			panic(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	data := ReadData()
 	if *drone_price > 0 {
 		temp := data.Commodities["Fighter Drones"]
