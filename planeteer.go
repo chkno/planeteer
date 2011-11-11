@@ -429,6 +429,14 @@ func FillCellByMisc(data planet_data, dims []int, table []State, addr []int) {
 	}
 
 	/* Visit this planet */
+	var i uint
+	for i = 0; i < uint(len(visit())); i++ {
+		if addr[Visit] & (1 << i) != 0 && visit()[i] == data.i2p[addr[Location]] {
+			other[Visit] = addr[Visit] & ^(1 << i)
+			UpdateCell(table, my_index, EncodeIndex(dims, other), 0)
+		}
+	}
+	other[Visit] = addr[Visit]
 
 }
 
@@ -617,6 +625,10 @@ func DescribePath(data planet_data, dims []int, table []State, start int) (descr
 		}
 		if addr[BuyFighters] == 1 && prev[BuyFighters] == 0 {
 			line += fmt.Sprint("Buy ", *drones, " Fighter Drones")
+		}
+		if addr[Visit] != prev[Visit] {
+			// TODO: verify that the bit chat changed is addr[Location]
+			line += fmt.Sprint("Visit ", data.i2p[addr[Location]])
 		}
 		if line == "" {
 			line = fmt.Sprint(prev, " -> ", addr)
