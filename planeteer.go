@@ -584,15 +584,17 @@ func FindBestState(data planet_data, dims []int, table []State) int {
 	addr[BuyFighters] = dims[BuyFighters] - 1
 	addr[BuyShields] = dims[BuyShields] - 1
 	addr[Visit] = dims[Visit] - 1
-	// Fuel, Hold, UnusedCargo left at 0
+	// Hold and UnusedCargo left at 0
 	max_index := -1
 	max_value := 0
-	for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
-		if len(end()) == 0 || end()[data.i2p[addr[Location]]] {
-			index := EncodeIndex(dims, addr)
-			if table[index].value > max_value {
-				max_value = table[index].value
-				max_index = index
+	for addr[Fuel] = 0; addr[Fuel] < 2; addr[Fuel]++ {
+		for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
+			if len(end()) == 0 || end()[data.i2p[addr[Location]]] {
+				index := EncodeIndex(dims, addr)
+				if table[index].value > max_value {
+					max_value = table[index].value
+					max_index = index
+				}
 			}
 		}
 	}
