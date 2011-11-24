@@ -110,6 +110,7 @@ type Commodity struct {
 }
 type Planet struct {
 	BeaconOn bool
+	Private bool
 	/* Use relative prices rather than absolute prices because you
 	   can get relative prices without traveling to each planet. */
 	RelativePrices map[string]int
@@ -336,6 +337,10 @@ func FillCellByArriving(data planet_data, dims []int, table []State, addr []int)
 }
 
 func FillCellBySelling(data planet_data, dims []int, table []State, addr []int) {
+	if data.Planets[data.i2p[addr[Location]]].Private {
+		// Can't do commerce on private planets
+		return
+	}
 	if addr[Hold] > 0 {
 		// Can't sell and still have cargo
 		return
@@ -373,6 +378,10 @@ func FillCellBySelling(data planet_data, dims []int, table []State, addr []int) 
 }
 
 func FillCellByBuying(data planet_data, dims []int, table []State, addr []int) {
+	if data.Planets[data.i2p[addr[Location]]].Private {
+		// Can't do commerce on private planets
+		return
+	}
 	if addr[Hold] == 0 {
 		// Can't buy and then have nothing
 		return
