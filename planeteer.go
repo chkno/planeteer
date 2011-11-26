@@ -65,8 +65,8 @@ var visit_string = flag.String("visit", "",
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
-
 var visit_cache []string
+
 func visit() []string {
 	if visit_cache == nil {
 		if *visit_string == "" {
@@ -78,6 +78,7 @@ func visit() []string {
 }
 
 var flight_plan_cache []string
+
 func flight_plan() []string {
 	if flight_plan_cache == nil {
 		if *flight_plan_string == "" {
@@ -89,6 +90,7 @@ func flight_plan() []string {
 }
 
 var end_cache map[string]bool
+
 func end() map[string]bool {
 	if end_cache == nil {
 		if *end_string == "" {
@@ -110,7 +112,7 @@ type Commodity struct {
 }
 type Planet struct {
 	BeaconOn bool
-	Private bool
+	Private  bool
 	/* Use relative prices rather than absolute prices because you
 	   can get relative prices without traveling to each planet. */
 	RelativePrices map[string]int
@@ -178,16 +180,16 @@ func ReadData() (data planet_data) {
 // The official list of dimensions:
 const (
 	// Name                Num   Size  Description
-	Edens        = iota //   1      3  # of Eden warp units (0 - 2 typically)
-	Cloaks              //   2    1-2  # of Devices of Cloaking (0 or 1)
-	UnusedCargo         //   3      4  # of unused cargo spaces (0 - 3 typically)
-	Fuel                //   4     17  Hyper jump power left (0 - 16)
-	Location            //   5     26  Location (which planet)
-	Hold                //   6     15  Cargo bay contents (a *Commodity or nil)
-	Traded              //   7      2  Traded yet?
-	BuyFighters         //   8    1-2  Errand: Buy fighter drones
-	BuyShields          //   9    1-2  Errand: Buy shield batteries
-	Visit               //  10 1-2**N  Visit: Stop by these N planets in the route
+	Edens       = iota //   1      3  # of Eden warp units (0 - 2 typically)
+	Cloaks             //   2    1-2  # of Devices of Cloaking (0 or 1)
+	UnusedCargo        //   3      4  # of unused cargo spaces (0 - 3 typically)
+	Fuel               //   4     17  Hyper jump power left (0 - 16)
+	Location           //   5     26  Location (which planet)
+	Hold               //   6     15  Cargo bay contents (a *Commodity or nil)
+	Traded             //   7      2  Traded yet?
+	BuyFighters        //   8    1-2  Errand: Buy fighter drones
+	BuyShields         //   9    1-2  Errand: Buy shield batteries
+	Visit              //  10 1-2**N  Visit: Stop by these N planets in the route
 
 	NumDimensions
 )
@@ -238,9 +240,11 @@ type State struct {
 	value, from int32
 }
 
-const CELL_UNINITIALIZED =   -2147483647
-const CELL_BEING_EVALUATED = -2147483646
-const CELL_RUBISH =          -2147483645
+const (
+	CELL_UNINITIALIZED = -2147483647 + iota
+	CELL_BEING_EVALUATED
+	CELL_RUBISH
+)
 
 func EncodeIndex(dims, addr []int) int32 {
 	index := addr[0]
@@ -299,6 +303,7 @@ func Consider(data planet_data, dims []int, table []State, there []int, value_di
 }
 
 var cell_filled_count int
+
 func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	my_index := EncodeIndex(dims, addr)
 	if table[my_index].value == CELL_BEING_EVALUATED {
@@ -444,7 +449,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 		if available {
 			absolute_price := int(float64(data.Commodities["Fighter Drones"].BasePrice) * float64(relative_price) / 100.0)
 			other[BuyFighters] = 0
-			Consider(data, dims, table, other, -absolute_price * *drones, &best_value, best_source)
+			Consider(data, dims, table, other, -absolute_price**drones, &best_value, best_source)
 			other[BuyFighters] = addr[BuyFighters]
 		}
 	}
@@ -455,7 +460,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 		if available {
 			absolute_price := int(float64(data.Commodities["Shield Batterys"].BasePrice) * float64(relative_price) / 100.0)
 			other[BuyShields] = 0
-			Consider(data, dims, table, other, -absolute_price * *batteries, &best_value, best_source)
+			Consider(data, dims, table, other, -absolute_price**batteries, &best_value, best_source)
 			other[BuyShields] = addr[BuyShields]
 		}
 	}
@@ -463,7 +468,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	/* Visit this planet */
 	var i uint
 	for i = 0; i < uint(len(visit())); i++ {
-		if addr[Visit] & (1 << i) != 0 && visit()[i] == data.i2p[addr[Location]] {
+		if addr[Visit]&(1<<i) != 0 && visit()[i] == data.i2p[addr[Location]] {
 			other[Visit] = addr[Visit] & ^(1 << i)
 			Consider(data, dims, table, other, 0, &best_value, best_source)
 		}
@@ -482,7 +487,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 					other[UnusedCargo] = addr[UnusedCargo] + quantity
 				}
 				if other[UnusedCargo] < dims[UnusedCargo] {
-					Consider(data, dims, table, other, -absolute_price * quantity, &best_value, best_source)
+					Consider(data, dims, table, other, -absolute_price*quantity, &best_value, best_source)
 				}
 			}
 			other[Edens] = addr[Edens]
@@ -508,8 +513,8 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	table[my_index].from = EncodeIndex(dims, best_source)
 
 	// UI: Progress bar
-	cell_filled_count ++
-	if cell_filled_count & 0xff == 0 {
+	cell_filled_count++
+	if cell_filled_count&0xff == 0 {
 		print(fmt.Sprintf("\r%3.1f%%", 100*float64(cell_filled_count)/float64(StateTableSize(dims))))
 	}
 
@@ -569,7 +574,7 @@ func DescribePath(data planet_data, dims []int, table []State, start int32) (des
 			to := data.i2p[addr[Location]]
 			line += fmt.Sprintf("Jump from %v to %v (%v hyper jump units)", from, to, prev[Fuel]-addr[Fuel])
 		}
-		if addr[Edens] == prev[Edens] - 1 {
+		if addr[Edens] == prev[Edens]-1 {
 			from := data.i2p[prev[Location]]
 			to := data.i2p[addr[Location]]
 			line += fmt.Sprintf("Eden warp from %v to %v", from, to)
@@ -591,7 +596,7 @@ func DescribePath(data planet_data, dims []int, table []State, start int32) (des
 			line += "Buy a Cloak"
 		}
 		if addr[Edens] > prev[Edens] {
-			line += fmt.Sprint("Buy ", addr[Edens] - prev[Edens], " Eden Warp Units")
+			line += fmt.Sprint("Buy ", addr[Edens]-prev[Edens], " Eden Warp Units")
 		}
 		if addr[BuyShields] == 1 && prev[BuyShields] == 0 {
 			line += fmt.Sprint("Buy ", *batteries, " Shield Batterys")
@@ -611,7 +616,7 @@ func DescribePath(data planet_data, dims []int, table []State, start int32) (des
 		if line == "" {
 			line = fmt.Sprint(prev, " -> ", addr)
 		}
-		description = append(description, fmt.Sprintf("%13v ", Commas(table[index].value)) + line)
+		description = append(description, fmt.Sprintf("%13v ", Commas(table[index].value))+line)
 	}
 	return
 }
