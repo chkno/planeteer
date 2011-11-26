@@ -348,7 +348,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 		}
 
 		/* Travel here via Eden Warp Unit */
-		if addr[Edens]+1 < dims[Edens] && addr[UnusedCargo] > 1 {
+		if addr[Edens]+1 < dims[Edens] && addr[UnusedCargo] > 0 {
 			_, available := data.Planets[data.i2p[addr[Location]]].RelativePrices["Eden Warp Units"]
 			if !available {
 				other[Edens] = addr[Edens] + 1
