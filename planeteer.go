@@ -243,17 +243,17 @@ const CELL_BEING_EVALUATED = -2147483646
 const CELL_RUBISH =          -2147483645
 
 func EncodeIndex(dims, addr []int) int32 {
-	index := int32(addr[0])
+	index := addr[0]
 	if addr[0] > dims[0] {
 		panic(0)
 	}
 	for i := 1; i < NumDimensions; i++ {
-		if addr[i] < 0 || addr[i] > dims[i] {
+		if addr[i] < 0 || addr[i] >= dims[i] {
 			panic(i)
 		}
-		index = index*int32(dims[i]) + int32(addr[i])
+		index = index*dims[i] + addr[i]
 	}
-	return index
+	return int32(index)
 }
 
 func DecodeIndex(dims []int, index int32) []int {
@@ -490,12 +490,24 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 		}
 	}
 
+	// Check that we didn't lose track of any temporary modifications to other.
+	for i := 0; i < NumDimensions; i++ {
+		if addr[i] != other[i] {
+			panic(i)
+		}
+	}
+
+	// Sanity check: This cell was in state BEING_EVALUATED
+	// the whole time that it was being evaluated.
 	if table[my_index].value != CELL_BEING_EVALUATED {
 		panic(my_index)
 	}
+
+	// Record our findings
 	table[my_index].value = best_value
 	table[my_index].from = EncodeIndex(dims, best_source)
 
+	// UI: Progress bar
 	cell_filled_count ++
 	if cell_filled_count & 0xff == 0 {
 		print(fmt.Sprintf("\r%3.1f%%", 100*float64(cell_filled_count)/float64(StateTableSize(dims))))
@@ -512,10 +524,15 @@ func FindBestState(data planet_data, dims []int, table []State) int32 {
 	addr[BuyShields] = dims[BuyShields] - 1
 	addr[Visit] = dims[Visit] - 1
 	addr[Traded] = 1
-	// Hold and UnusedCargo left at 0
+	addr[Hold] = 0
+	addr[UnusedCargo] = 0
 	max_index := int32(-1)
 	max_value := int32(0)
-	for addr[Fuel] = 0; addr[Fuel] < 2; addr[Fuel]++ {
+	max_fuel := 1
+	if *fuel == 0 {
+		max_fuel = 0
+	}
+	for addr[Fuel] = 0; addr[Fuel] <= max_fuel; addr[Fuel]++ {
 		for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
 			if len(end()) == 0 || end()[data.i2p[addr[Location]]] {
 				index := EncodeIndex(dims, addr)
