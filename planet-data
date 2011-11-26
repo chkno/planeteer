@@ -127,7 +127,7 @@
 			}
 		},
 		"Volcana": {
-			"BeaconOn": true,
+			"BeaconOn": false,
 			"RelativePrices": {
 				"Device Of Cloakings":        187,
 				"Medical Units":              143,
@@ -381,7 +381,7 @@
 			}
 		},
 		"Schooloria": {
-			"BeaconOn": true,
+			"BeaconOn": false,
 			"RelativePrices": {
 				"Heating Units":              100,
 				"Ice Units":                  100,
@@ -391,7 +391,7 @@
 			}
 		},
 		"Uniland": {
-			"BeaconOn": true,
+			"BeaconOn": false,
 			"RelativePrices": {
 			}
 		},
