@@ -648,6 +648,10 @@ func IndexCommodities(m *map[string]Commodity, start_at int) (map[string]int, []
 
 func main() {
 	flag.Parse()
+	if *start == "" || *funds == 0 {
+		print("--start and --funds are required.  --help for more\n")
+		return
+	}
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
