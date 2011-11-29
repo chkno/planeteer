@@ -241,9 +241,11 @@ type State struct {
 }
 
 const (
-	CELL_UNINITIALIZED = -2147483647 + iota
-	CELL_BEING_EVALUATED
-	CELL_RUBISH
+	FROM_ROOT = -2147483647 + iota
+	FROM_UNINITIALIZED
+	VALUE_UNINITIALIZED
+	VALUE_BEING_EVALUATED
+	VALUE_RUBISH
 )
 
 func EncodeIndex(dims, addr []int) int32 {
@@ -273,7 +275,8 @@ func DecodeIndex(dims []int, index int32) []int {
 func CreateStateTable(data planet_data, dims []int) []State {
 	table := make([]State, StateTableSize(dims))
 	for i := range table {
-		table[i].value = CELL_UNINITIALIZED
+		table[i].value = VALUE_UNINITIALIZED
+		table[i].from = FROM_UNINITIALIZED
 	}
 
 	addr := make([]int, NumDimensions)
@@ -281,7 +284,9 @@ func CreateStateTable(data planet_data, dims []int) []State {
 	addr[Edens] = *start_edens
 	addr[Location] = data.p2i[*start]
 	addr[Traded] = 1
-	table[EncodeIndex(dims, addr)].value = int32(*funds)
+	start_index := EncodeIndex(dims, addr)
+	table[start_index].value = int32(*funds)
+	table[start_index].from = FROM_ROOT
 
 	return table
 }
@@ -306,15 +311,15 @@ var cell_filled_count int
 
 func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	my_index := EncodeIndex(dims, addr)
-	if table[my_index].value == CELL_BEING_EVALUATED {
+	if table[my_index].value == VALUE_BEING_EVALUATED {
 		panic("Circular dependency")
 	}
-	if table[my_index].value != CELL_UNINITIALIZED {
+	if table[my_index].value != VALUE_UNINITIALIZED {
 		return table[my_index].value
 	}
-	table[my_index].value = CELL_BEING_EVALUATED
+	table[my_index].value = VALUE_BEING_EVALUATED
 
-	best_value := int32(CELL_RUBISH)
+	best_value := int32(VALUE_RUBISH)
 	best_source := make([]int, NumDimensions)
 	other := make([]int, NumDimensions)
 	copy(other, addr)
@@ -505,7 +510,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 
 	// Sanity check: This cell was in state BEING_EVALUATED
 	// the whole time that it was being evaluated.
-	if table[my_index].value != CELL_BEING_EVALUATED {
+	if table[my_index].value != VALUE_BEING_EVALUATED {
 		panic(my_index)
 	}
 
@@ -566,7 +571,10 @@ func Commas(n int32) (s string) {
 }
 
 func DescribePath(data planet_data, dims []int, table []State, start int32) (description []string) {
-	for index := start; index > 0 && table[index].from > 0; index = table[index].from {
+	for index := start; table[index].from > FROM_ROOT; index = table[index].from {
+		if table[index].from == FROM_UNINITIALIZED {
+			panic(index)
+		}
 		var line string
 		addr := DecodeIndex(dims, index)
 		prev := DecodeIndex(dims, table[index].from)
