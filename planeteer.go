@@ -426,6 +426,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 				}
 			}
 		}
+		other[Traded] = addr[Traded]
 	}
 
 	/* Buy a Device of Cloaking */
