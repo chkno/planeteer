@@ -520,7 +520,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 
 	// UI: Progress bar
 	cell_filled_count++
-	if cell_filled_count&0xff == 0 {
+	if cell_filled_count&0xfff == 0 {
 		print(fmt.Sprintf("\r%3.1f%%", 100*float64(cell_filled_count)/float64(StateTableSize(dims))))
 	}
 
