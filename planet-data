@@ -422,7 +422,7 @@
 			}
 		},
 		"Nirvana": {
-			"BeaconOn": true,
+			"BeaconOn": false,
 			"RelativePrices": {
 				"Device Of Cloakings":        67,
 				"AntiCloak Scanners":         92,
