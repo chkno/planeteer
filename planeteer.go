@@ -43,6 +43,8 @@ var fuel = flag.Int("fuel", 16, "Hyper Jump power left")
 
 var hold = flag.Int("hold", 300, "Size of your cargo hold")
 
+var start_hold = flag.String("start_hold", "", "Start with a hold full of cargo")
+
 var start_edens = flag.Int("start_edens", 0,
 	"How many Eden Warp Units are you starting with?")
 
@@ -283,7 +285,9 @@ func CreateStateTable(data planet_data, dims []int) []State {
 	addr[Fuel] = *fuel
 	addr[Edens] = *start_edens
 	addr[Location] = data.p2i[*start]
-	addr[Traded] = 1
+	if *start_hold != "" {
+		addr[Hold] = data.c2i[*start_hold]
+	}
 	start_index := EncodeIndex(dims, addr)
 	table[start_index].value = int32(*funds)
 	table[start_index].from = FROM_ROOT
