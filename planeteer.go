@@ -65,6 +65,9 @@ var battery_price = flag.Int("battery_price", 0, "Today's Shield Battery price")
 var visit_string = flag.String("visit", "",
 	"A comma-separated list of planets to make sure to visit")
 
+var tomorrow_weight = flag.Float64("tomorrow_weight", 1.0,
+	"Weight for the expected value of tomorrow's trading.  0.0 - 1.0")
+
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 var visit_cache []string
@@ -113,8 +116,9 @@ type Commodity struct {
 	Limit     int
 }
 type Planet struct {
-	BeaconOn bool
-	Private  bool
+	BeaconOn      bool
+	Private       bool
+	TomorrowValue int
 	/* Use relative prices rather than absolute prices because you
 	   can get relative prices without traveling to each planet. */
 	RelativePrices map[string]int
@@ -542,16 +546,19 @@ func FindBestState(data planet_data, dims []int, table []State) int32 {
 	addr[Hold] = 0
 	addr[UnusedCargo] = 0
 	max_index := int32(-1)
-	max_value := int32(0)
+	max_value := 0.0
 	max_fuel := 1
 	if *fuel == 0 {
 		max_fuel = 0
 	}
 	for addr[Fuel] = 0; addr[Fuel] <= max_fuel; addr[Fuel]++ {
 		for addr[Location] = 0; addr[Location] < dims[Location]; addr[Location]++ {
-			if len(end()) == 0 || end()[data.i2p[addr[Location]]] {
+			planet := data.i2p[addr[Location]]
+			if len(end()) == 0 || end()[planet] {
 				index := EncodeIndex(dims, addr)
-				value := CellValue(data, dims, table, addr)
+				today_value := CellValue(data, dims, table, addr)
+				tomorrow_value := *tomorrow_weight * float64(*hold+data.Planets[planet].TomorrowValue)
+				value := float64(today_value) + tomorrow_value
 				if value > max_value {
 					max_value = value
 					max_index = index

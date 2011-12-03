@@ -94,6 +94,7 @@
 	"Planets": {
 		"Earth": {
 			"BeaconOn": true,
+			"TomorrowValue": 4472,
 			"RelativePrices": {
 				"Shield Batterys":            100,
 				"Device Of Cloakings":        100,
@@ -114,6 +115,7 @@
 		},
 		"Hothor": {
 			"BeaconOn": true,
+			"TomorrowValue": 3789,
 			"RelativePrices": {
 				"Shield Batterys":            176,
 				"Device Of Cloakings":        112,
@@ -128,6 +130,7 @@
 		},
 		"Volcana": {
 			"BeaconOn": false,
+			"TomorrowValue": 4330,
 			"RelativePrices": {
 				"Device Of Cloakings":        187,
 				"Medical Units":              143,
@@ -140,6 +143,7 @@
 		},
 		"Metallica": {
 			"BeaconOn": true,
+			"TomorrowValue": 4757,
 			"RelativePrices": {
 				"Shield Batterys":            67,
 				"Device Of Cloakings":        78,
@@ -151,6 +155,7 @@
 		},
 		"Medoca": {
 			"BeaconOn": true,
+			"TomorrowValue": 3968,
 			"RelativePrices": {
 				"Medical Units":              23,
 				"Ice Units":                  124,
@@ -161,6 +166,7 @@
 		},
 		"Gojuon": {
 			"BeaconOn": true,
+			"TomorrowValue": 3813,
 			"RelativePrices": {
 				"Heating Units":              99,
 				"Ice Units":                  1187,
@@ -173,6 +179,7 @@
 		},
 		"Desha Rockna": {
 			"BeaconOn": true,
+			"TomorrowValue": 3908,
 			"RelativePrices": {
 				"Medical Units":              134,
 				"Heating Units":              124,
@@ -186,6 +193,7 @@
 		},
 		"Dogafetch": {
 			"BeaconOn": true,
+			"TomorrowValue": 4137,
 			"RelativePrices": {
 				"Shield Batterys":            123,
 				"Device Of Cloakings":        67,
@@ -201,6 +209,7 @@
 		},
 		"Eden": {
 			"BeaconOn": false,
+			"TomorrowValue": 20036,
 			"RelativePrices": {
 				"Medical Units":              100,
 				"Tree Growth Kits":           11,
@@ -209,6 +218,7 @@
 		},
 		"Richiana": {
 			"BeaconOn": true,
+			"TomorrowValue": 1908,
 			"RelativePrices": {
 				"Device Of Cloakings":        157,
 				"Medical Units":              654,
@@ -224,6 +234,7 @@
 		},
 		"Tribonia": {
 			"BeaconOn": true,
+			"TomorrowValue": 3837,
 			"RelativePrices": {
 				"Medical Units":              187,
 				"Heating Units":              345,
@@ -237,6 +248,7 @@
 		},
 		"Dune": {
 			"BeaconOn": true,
+			"TomorrowValue": 3674,
 			"RelativePrices": {
 				"Shield Batterys":            143,
 				"Device Of Cloakings":        176,
@@ -251,6 +263,7 @@
 		},
 		"Plague": {
 			"BeaconOn": true,
+			"TomorrowValue": 4052,
 			"RelativePrices": {
 				"Medical Units":              239,
 				"Heating Units":              88,
@@ -263,6 +276,7 @@
 		},
 		"Norhaven": {
 			"BeaconOn": true,
+			"TomorrowValue": 4517,
 			"RelativePrices": {
 				"Shield Batterys":            100,
 				"Device Of Cloakings":        88,
@@ -284,6 +298,7 @@
 		},
 		"Loony": {
 			"BeaconOn": true,
+			"TomorrowValue": 3360,
 			"RelativePrices": {
 				"Shield Batterys":            500,
 				"Device Of Cloakings":        55,
@@ -298,6 +313,7 @@
 		},
 		"WeaponWorld": {
 			"BeaconOn": true,
+			"TomorrowValue": 4623,
 			"RelativePrices": {
 				"Shield Batterys":            100,
 				"Device Of Cloakings":        98,
@@ -316,6 +332,7 @@
 		},
 		"Zoolie": {
 			"BeaconOn": true,
+			"TomorrowValue": 3802,
 			"RelativePrices": {
 				"Medical Units":              78,
 				"Heating Units":              344,
@@ -328,6 +345,7 @@
 		},
 		"Baboria": {
 			"BeaconOn": true,
+			"TomorrowValue": 3869,
 			"RelativePrices": {
 				"Medical Units":              100,
 				"Heating Units":              122,
@@ -342,6 +360,7 @@
 		},
 		"StockWorld": {
 			"BeaconOn": true,
+			"TomorrowValue": 4462,
 			"RelativePrices": {
 				"Shield Batterys":            103,
 				"Device Of Cloakings":        102,
@@ -360,6 +379,7 @@
 		},
 		"HugeLind Mar": {
 			"BeaconOn": true,
+			"TomorrowValue": 3563,
 			"RelativePrices": {
 				"Device Of Cloakings":        123,
 				"Medical Units":              117,
@@ -372,6 +392,7 @@
 		},
 		"Sickonia": {
 			"BeaconOn": true,
+			"TomorrowValue": 2892,
 			"RelativePrices": {
 				"Medical Units":              1756,
 				"Heating Units":              100,
@@ -382,6 +403,7 @@
 		},
 		"Schooloria": {
 			"BeaconOn": false,
+			"TomorrowValue": 3554,
 			"RelativePrices": {
 				"Heating Units":              100,
 				"Ice Units":                  100,
@@ -392,11 +414,13 @@
 		},
 		"Uniland": {
 			"BeaconOn": false,
+			"TomorrowValue": 0,
 			"RelativePrices": {
 			}
 		},
 		"HomeWorld": {
 			"BeaconOn": true,
+			"TomorrowValue": 3005,
 			"RelativePrices": {
 				"Medical Units":              1783,
 				"Heating Units":              232,
@@ -410,6 +434,7 @@
 		},
 		"Dreamora": {
 			"BeaconOn": true,
+			"TomorrowValue": 4046,
 			"RelativePrices": {
 				"Device Of Cloakings":        123,
 				"Medical Units":              87,
@@ -423,6 +448,7 @@
 		},
 		"Nirvana": {
 			"BeaconOn": false,
+			"TomorrowValue": 4705,
 			"RelativePrices": {
 				"Device Of Cloakings":        67,
 				"AntiCloak Scanners":         92,
