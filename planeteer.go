@@ -19,7 +19,7 @@ package main
 
 import "flag"
 import "fmt"
-import "json"
+import "encoding/json"
 import "os"
 import "runtime/pprof"
 import "strings"
