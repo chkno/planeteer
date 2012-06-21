@@ -535,7 +535,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	return table[my_index].value
 }
 
-func FindBestState(data planet_data, dims []int, table []State) int32 {
+func FinalState(dims []int) []int {
 	addr := make([]int, NumDimensions)
 	addr[Edens] = *end_edens
 	addr[Cloaks] = dims[Cloaks] - 1
@@ -545,6 +545,11 @@ func FindBestState(data planet_data, dims []int, table []State) int32 {
 	addr[Traded] = 1
 	addr[Hold] = 0
 	addr[UnusedCargo] = 0
+	// Fuel and Location are determined by FindBestState
+	return addr
+}
+
+func FindBestState(data planet_data, dims []int, table []State, addr []int) int32 {
 	max_index := int32(-1)
 	max_value := 0.0
 	max_fuel := 1
@@ -694,14 +699,28 @@ func main() {
 	data.c2i, data.i2c = IndexCommodities(&data.Commodities, 1)
 	dims := DimensionSizes(data)
 	table := CreateStateTable(data, dims)
-	best := FindBestState(data, dims, table)
+	final_state := FinalState(dims)
+	best := FindBestState(data, dims, table, final_state)
 	print("\n")
 	if best == -1 {
 		print("Cannot acheive success criteria\n")
-	} else {
-		description := DescribePath(data, dims, table, best)
-		for i := len(description) - 1; i >= 0; i-- {
-			fmt.Println(description[i])
-		}
+		return
+	}
+	description := DescribePath(data, dims, table, best)
+	for i := len(description) - 1; i >= 0; i-- {
+		fmt.Println(description[i])
+	}
+
+	// Use extra eden warps
+	if *end_edens > 0 {
+		fmt.Println()
+	}
+	for extra_edens := 1; extra_edens <= *end_edens; extra_edens++ {
+		final_state[Edens] = *end_edens - extra_edens
+		alt_best := FindBestState(data, dims, table, final_state)
+		extra_funds := table[alt_best].value - table[best].value
+		fmt.Println("\rUse", extra_edens, "extra edens, make an extra",
+			Commas(extra_funds), "(",
+			Commas(extra_funds/int32(extra_edens)), "per eden)")
 	}
 }
