@@ -757,7 +757,7 @@ func main() {
 		final_state[Visit] = all_bits & ^(1 << i)
 		alt_best := FindBestState(data, dims, table, final_state)
 		cost := table[alt_best].value - table[best].value
-		fmt.Println("\r", Commas(cost), "Cost to visit", visit()[i])
+		fmt.Printf("\r%11v Cost to visit %v\n", Commas(cost), visit()[i])
 	}
 	final_state[Visit] = dims[Visit] - 1
 
