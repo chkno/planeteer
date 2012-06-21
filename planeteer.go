@@ -480,8 +480,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	}
 
 	/* Visit this planet */
-	var i uint
-	for i = 0; i < uint(len(visit())); i++ {
+	for i := uint(0); i < uint(len(visit())); i++ {
 		if addr[Visit]&(1<<i) != 0 && visit()[i] == data.i2p[addr[Location]] {
 			other[Visit] = addr[Visit] & ^(1 << i)
 			Consider(data, dims, table, other, 0, &best_value, best_source)
@@ -575,6 +574,9 @@ func FindBestState(data planet_data, dims []int, table []State, addr []int) int3
 }
 
 func Commas(n int32) (s string) {
+	if n < 0 {
+		panic(n)
+	}
 	r := n % 1000
 	n /= 1000
 	for n > 0 {
@@ -711,6 +713,8 @@ func main() {
 		fmt.Println(description[i])
 	}
 
+	// Ok, that was the important stuff.  Now some fun stuff.
+
 	// Calculate total cost of fighters and shields
 	if *drones > 0 || *batteries > 0 {
 		fmt.Println()
@@ -719,14 +723,14 @@ func main() {
 		final_state[BuyFighters] = 0
 		alt_best := FindBestState(data, dims, table, final_state)
 		cost := table[alt_best].value - table[best].value
-		fmt.Println("Drones were", float64(cost)/float64(*drones), "each")
+		fmt.Println("\rDrones were", float64(cost)/float64(*drones), "each")
 		final_state[BuyFighters] = 1
 	}
 	if *batteries > 0 {
 		final_state[BuyShields] = 0
 		alt_best := FindBestState(data, dims, table, final_state)
 		cost := table[alt_best].value - table[best].value
-		fmt.Println("Batteries were", float64(cost)/float64(*batteries), "each")
+		fmt.Println("\rBatteries were", float64(cost)/float64(*batteries), "each")
 		final_state[BuyShields] = 1
 	}
 
@@ -742,4 +746,19 @@ func main() {
 			Commas(extra_funds), "(",
 			Commas(extra_funds/int32(extra_edens)), "per eden)")
 	}
+	final_state[Edens] = *end_edens
+
+	// Cost of visiting places
+	if dims[Visit] > 1 {
+		fmt.Println()
+	}
+	for i := uint(0); i < uint(len(visit())); i++ {
+		all_bits := dims[Visit] - 1
+		final_state[Visit] = all_bits & ^(1 << i)
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Println("\r", Commas(cost), "Cost to visit", visit()[i])
+	}
+	final_state[Visit] = dims[Visit] - 1
+
 }

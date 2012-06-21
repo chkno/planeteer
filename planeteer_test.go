@@ -17,3 +17,24 @@ func TestEncodeDecode(t *testing.T) {
 		}
 	}
 }
+
+func TestCommas(t *testing.T) {
+	cases := map[int32]string{
+		1: "1",
+		10: "10",
+		100: "100",
+		1000: "1,000",
+		10000: "10,000",
+		100000: "100,000",
+		1000000: "1,000,000",
+		1234567: "1,234,567",
+		1000567: "1,000,567",
+		1234000: "1,234,000",
+		525000: "525,000",
+	}
+	for n, s := range cases {
+		if Commas(n) != s {
+			t.Error(n, "not", s)
+		}
+	}
+}
