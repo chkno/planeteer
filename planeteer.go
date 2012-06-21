@@ -711,6 +711,25 @@ func main() {
 		fmt.Println(description[i])
 	}
 
+	// Calculate total cost of fighters and shields
+	if *drones > 0 || *batteries > 0 {
+		fmt.Println()
+	}
+	if *drones > 0 {
+		final_state[BuyFighters] = 0
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Println("Drones were", float64(cost)/float64(*drones), "each")
+		final_state[BuyFighters] = 1
+	}
+	if *batteries > 0 {
+		final_state[BuyShields] = 0
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Println("Batteries were", float64(cost)/float64(*batteries), "each")
+		final_state[BuyShields] = 1
+	}
+
 	// Use extra eden warps
 	if *end_edens > 0 {
 		fmt.Println()
