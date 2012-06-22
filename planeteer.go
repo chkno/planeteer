@@ -588,6 +588,73 @@ func Commas(n int32) (s string) {
 	return
 }
 
+func FighterAndShieldCost(data planet_data, dims []int, table []State, best int32) {
+	if *drones == 0 && *batteries == 0 {
+		return
+	}
+	fmt.Println()
+	if *drones > 0 {
+		final_state := FinalState(dims)
+		final_state[BuyFighters] = 0
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Println("\rDrones were", float64(cost)/float64(*drones), "each")
+	}
+	if *batteries > 0 {
+		final_state := FinalState(dims)
+		final_state[BuyShields] = 0
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Println("\rBatteries were", float64(cost)/float64(*batteries), "each")
+	}
+}
+
+func EndEdensCost(data planet_data, dims []int, table []State, best int32) {
+	if *end_edens == 0 {
+		return
+	}
+	fmt.Println()
+	final_state := FinalState(dims)
+	for extra_edens := 1; extra_edens <= *end_edens; extra_edens++ {
+		final_state[Edens] = *end_edens - extra_edens
+		alt_best := FindBestState(data, dims, table, final_state)
+		extra_funds := table[alt_best].value - table[best].value
+		fmt.Println("\rUse", extra_edens, "extra edens, make an extra",
+			Commas(extra_funds), "(",
+			Commas(extra_funds/int32(extra_edens)), "per eden)")
+	}
+}
+
+func VisitCost(data planet_data, dims []int, table []State, best int32) {
+	if dims[Visit] == 1 {
+		return
+	}
+	fmt.Println()
+	final_state := FinalState(dims)
+	for i := uint(0); i < uint(len(visit())); i++ {
+		all_bits := dims[Visit] - 1
+		final_state[Visit] = all_bits & ^(1 << i)
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Printf("\r%11v Cost to visit %v\n", Commas(cost), visit()[i])
+	}
+}
+
+func EndLocationCost(data planet_data, dims []int, table []State, best int32) {
+	if len(end()) == 0 {
+		return
+	}
+	fmt.Println()
+	final_state := FinalState(dims)
+	save_end_string := *end_string
+	*end_string = ""
+	end_cache = nil
+	alt_best := FindBestState(data, dims, table, final_state)
+	cost := table[alt_best].value - table[best].value
+	fmt.Printf("\r%11v Cost of --end %v\n", Commas(cost), save_end_string)
+	*end_string = save_end_string
+}
+
 func DescribePath(data planet_data, dims []int, table []State, start int32) (description []string) {
 	for index := start; table[index].from > FROM_ROOT; index = table[index].from {
 		if table[index].from == FROM_UNINITIALIZED {
@@ -713,63 +780,8 @@ func main() {
 		fmt.Println(description[i])
 	}
 
-	// Ok, that was the important stuff.  Now some fun stuff.
-
-	// Calculate total cost of fighters and shields
-	if *drones > 0 || *batteries > 0 {
-		fmt.Println()
-	}
-	if *drones > 0 {
-		final_state[BuyFighters] = 0
-		alt_best := FindBestState(data, dims, table, final_state)
-		cost := table[alt_best].value - table[best].value
-		fmt.Println("\rDrones were", float64(cost)/float64(*drones), "each")
-		final_state[BuyFighters] = 1
-	}
-	if *batteries > 0 {
-		final_state[BuyShields] = 0
-		alt_best := FindBestState(data, dims, table, final_state)
-		cost := table[alt_best].value - table[best].value
-		fmt.Println("\rBatteries were", float64(cost)/float64(*batteries), "each")
-		final_state[BuyShields] = 1
-	}
-
-	// Use extra eden warps / cost of --end_edends
-	if *end_edens > 0 {
-		fmt.Println()
-	}
-	for extra_edens := 1; extra_edens <= *end_edens; extra_edens++ {
-		final_state[Edens] = *end_edens - extra_edens
-		alt_best := FindBestState(data, dims, table, final_state)
-		extra_funds := table[alt_best].value - table[best].value
-		fmt.Println("\rUse", extra_edens, "extra edens, make an extra",
-			Commas(extra_funds), "(",
-			Commas(extra_funds/int32(extra_edens)), "per eden)")
-	}
-	final_state[Edens] = *end_edens
-
-	// Cost of visiting places
-	if dims[Visit] > 1 {
-		fmt.Println()
-	}
-	for i := uint(0); i < uint(len(visit())); i++ {
-		all_bits := dims[Visit] - 1
-		final_state[Visit] = all_bits & ^(1 << i)
-		alt_best := FindBestState(data, dims, table, final_state)
-		cost := table[alt_best].value - table[best].value
-		fmt.Printf("\r%11v Cost to visit %v\n", Commas(cost), visit()[i])
-	}
-	final_state[Visit] = dims[Visit] - 1
-
-	// Cost of --end
-	if len(end()) > 0 {
-		save_end_string := *end_string
-		*end_string = ""
-		end_cache = nil
-		alt_best := FindBestState(data, dims, table, final_state)
-		cost := table[alt_best].value - table[best].value
-		fmt.Printf("\r\n%11v Cost of --end %v\n", Commas(cost), save_end_string)
-		*end_string = save_end_string
-	}
-
+	FighterAndShieldCost(data, dims, table, best)
+	EndEdensCost(data, dims, table, best)
+	VisitCost(data, dims, table, best)
+	EndLocationCost(data, dims, table, best)
 }
