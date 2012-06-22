@@ -734,7 +734,7 @@ func main() {
 		final_state[BuyShields] = 1
 	}
 
-	// Use extra eden warps
+	// Use extra eden warps / cost of --end_edends
 	if *end_edens > 0 {
 		fmt.Println()
 	}
@@ -760,5 +760,16 @@ func main() {
 		fmt.Printf("\r%11v Cost to visit %v\n", Commas(cost), visit()[i])
 	}
 	final_state[Visit] = dims[Visit] - 1
+
+	// Cost of --end
+	if len(end()) > 0 {
+		save_end_string := *end_string
+		*end_string = ""
+		end_cache = nil
+		alt_best := FindBestState(data, dims, table, final_state)
+		cost := table[alt_best].value - table[best].value
+		fmt.Printf("\r\n%11v Cost of --end %v\n", Commas(cost), save_end_string)
+		*end_string = save_end_string
+	}
 
 }
