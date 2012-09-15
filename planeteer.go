@@ -68,6 +68,9 @@ var visit_string = flag.String("visit", "",
 var tomorrow_weight = flag.Float64("tomorrow_weight", 1.0,
 	"Weight for the expected value of tomorrow's trading.  0.0 - 1.0")
 
+var extra_stats = flag.Bool("extra_stats", true,
+	"Show additional information of possible interest")
+
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 var visit_cache []string
@@ -780,8 +783,10 @@ func main() {
 		fmt.Println(description[i])
 	}
 
-	FighterAndShieldCost(data, dims, table, best)
-	EndEdensCost(data, dims, table, best)
-	VisitCost(data, dims, table, best)
-	EndLocationCost(data, dims, table, best)
+	if *extra_stats {
+		FighterAndShieldCost(data, dims, table, best)
+		EndEdensCost(data, dims, table, best)
+		VisitCost(data, dims, table, best)
+		EndLocationCost(data, dims, table, best)
+	}
 }
