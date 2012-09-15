@@ -170,16 +170,18 @@ func ReadData() (data planet_data) {
  * independent -- some combinations are illegal and not used.  They are
  * handled as three dimensions rather than one for simplicity.  Placing
  * these dimensions first causes the unused cells in the table to be
- * grouped together in large blocks.  This keeps them from polluting
- * cache lines, and if they are large enough, allows the memory manager
- * to swap out entire pages.
+ * grouped together in large blocks.  This keeps the unused cells from
+ * polluting cache lines, and if the spans of unused cells are large
+ * enough, allows the memory manager to swap out entire pages.
  *
  * If the table gets too big to fit in RAM:
  *    * Combine the Edens, Cloaks, and UnusedCargo dimensions.  Of the
  *      24 combinations, only 15 are legal: a 38% savings.
- *    * Reduce the size of the Fuel dimension to 3.  We only ever look
- *      backwards 2 units, so just rotate the logical values through
- *      the same 3 physical addresses.  This is good for an 82% savings.
+ *    * Reduce the size of the Fuel dimension to 3.  Explicit iteration
+ *      only ever needs to look backwards 2 units, so the logical values
+ *      can rotate through the same 3 physical addresses.  This would be
+ *      good for an 82% savings.  Note that explicit iteration went away
+ *      in 0372f045.
  *    * Reduce the size of the Edens dimension from 3 to 2, for the
  *      same reasons as Fuel above.  33% savings.
  *    * Buy more ram.  (Just sayin'.  It's cheaper than you think.)
