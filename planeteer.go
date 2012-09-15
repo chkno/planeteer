@@ -248,7 +248,8 @@ func StateTableSize(dims []int) int {
 }
 
 type State struct {
-	value, from int32
+	value int32
+	from  PhysicalIndex
 }
 
 const (
@@ -259,7 +260,9 @@ const (
 	VALUE_RUBISH
 )
 
-func EncodeIndex(dims, addr []int) int32 {
+type PhysicalIndex int32
+
+func EncodeIndex(dims, addr []int) PhysicalIndex {
 	index := addr[0]
 	if addr[0] > dims[0] {
 		panic(0)
@@ -270,16 +273,17 @@ func EncodeIndex(dims, addr []int) int32 {
 		}
 		index = index*dims[i] + addr[i]
 	}
-	return int32(index)
+	return PhysicalIndex(index)
 }
 
-func DecodeIndex(dims []int, index int32) []int {
+func DecodeIndex(dims []int, index PhysicalIndex) []int {
+	scratch := int(index)
 	addr := make([]int, NumDimensions)
 	for i := NumDimensions - 1; i > 0; i-- {
-		addr[i] = int(index) % dims[i]
-		index /= int32(dims[i])
+		addr[i] = scratch % dims[i]
+		scratch /= dims[i]
 	}
-	addr[0] = int(index)
+	addr[0] = scratch
 	return addr
 }
 
@@ -553,8 +557,8 @@ func FinalState(dims []int) []int {
 	return addr
 }
 
-func FindBestState(data planet_data, dims []int, table []State, addr []int) int32 {
-	max_index := int32(-1)
+func FindBestState(data planet_data, dims []int, table []State, addr []int) PhysicalIndex {
+	max_index := PhysicalIndex(-1)
 	max_value := 0.0
 	max_fuel := 1
 	if *fuel == 0 {
@@ -593,7 +597,7 @@ func Commas(n int32) (s string) {
 	return
 }
 
-func FighterAndShieldCost(data planet_data, dims []int, table []State, best int32) {
+func FighterAndShieldCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
 	if *drones == 0 && *batteries == 0 {
 		return
 	}
@@ -614,7 +618,7 @@ func FighterAndShieldCost(data planet_data, dims []int, table []State, best int3
 	}
 }
 
-func EndEdensCost(data planet_data, dims []int, table []State, best int32) {
+func EndEdensCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
 	if *end_edens == 0 {
 		return
 	}
@@ -630,7 +634,7 @@ func EndEdensCost(data planet_data, dims []int, table []State, best int32) {
 	}
 }
 
-func VisitCost(data planet_data, dims []int, table []State, best int32) {
+func VisitCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
 	if dims[Visit] == 1 {
 		return
 	}
@@ -645,7 +649,7 @@ func VisitCost(data planet_data, dims []int, table []State, best int32) {
 	}
 }
 
-func EndLocationCost(data planet_data, dims []int, table []State, best int32) {
+func EndLocationCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
 	if len(end()) == 0 {
 		return
 	}
@@ -660,7 +664,7 @@ func EndLocationCost(data planet_data, dims []int, table []State, best int32) {
 	*end_string = save_end_string
 }
 
-func DescribePath(data planet_data, dims []int, table []State, start int32) (description []string) {
+func DescribePath(data planet_data, dims []int, table []State, start PhysicalIndex) (description []string) {
 	for index := start; table[index].from > FROM_ROOT; index = table[index].from {
 		if table[index].from == FROM_UNINITIALIZED {
 			panic(index)
