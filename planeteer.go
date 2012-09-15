@@ -212,13 +212,13 @@ func bint(b bool) int {
 	return 0
 }
 
-func DimensionSizes(data planet_data) []int {
+func DimensionSizes(data planet_data) LogicalIndex {
 	eden_capacity := data.Commodities["Eden Warp Units"].Limit
 	if *start_edens > eden_capacity {
 		eden_capacity = *start_edens
 	}
 	cloak_capacity := bint(*cloak)
-	dims := make([]int, NumDimensions)
+	dims := make(LogicalIndex, NumDimensions)
 	dims[Edens] = eden_capacity + 1
 	dims[Cloaks] = cloak_capacity + 1
 	dims[UnusedCargo] = eden_capacity + cloak_capacity + 1
@@ -239,16 +239,17 @@ func DimensionSizes(data planet_data) []int {
 	return dims
 }
 
-func StateTableSize(dims []int) int {
+type Value int32
+type PhysicalIndex int32
+type LogicalIndex []int
+
+func StateTableSize(dims LogicalIndex) int {
 	product := 1
 	for _, size := range dims {
 		product *= size
 	}
 	return product
 }
-
-type Value int32
-type PhysicalIndex int32
 
 type State struct {
 	value Value
@@ -263,7 +264,7 @@ const (
 	VALUE_RUBISH
 )
 
-func EncodeIndex(dims, addr []int) PhysicalIndex {
+func EncodeIndex(dims, addr LogicalIndex) PhysicalIndex {
 	index := addr[0]
 	if addr[0] > dims[0] {
 		panic(0)
@@ -277,9 +278,9 @@ func EncodeIndex(dims, addr []int) PhysicalIndex {
 	return PhysicalIndex(index)
 }
 
-func DecodeIndex(dims []int, index PhysicalIndex) []int {
+func DecodeIndex(dims LogicalIndex, index PhysicalIndex) LogicalIndex {
 	scratch := int(index)
-	addr := make([]int, NumDimensions)
+	addr := make(LogicalIndex, NumDimensions)
 	for i := NumDimensions - 1; i > 0; i-- {
 		addr[i] = scratch % dims[i]
 		scratch /= dims[i]
@@ -288,14 +289,14 @@ func DecodeIndex(dims []int, index PhysicalIndex) []int {
 	return addr
 }
 
-func CreateStateTable(data planet_data, dims []int) []State {
+func CreateStateTable(data planet_data, dims LogicalIndex) []State {
 	table := make([]State, StateTableSize(dims))
 	for i := range table {
 		table[i].value = VALUE_UNINITIALIZED
 		table[i].from = FROM_UNINITIALIZED
 	}
 
-	addr := make([]int, NumDimensions)
+	addr := make(LogicalIndex, NumDimensions)
 	addr[Fuel] = *fuel
 	addr[Edens] = *start_edens
 	addr[Location] = data.p2i[*start]
@@ -312,7 +313,7 @@ func CreateStateTable(data planet_data, dims []int) []State {
 /* CellValue fills in the one cell at address addr by looking at all
  * the possible ways to reach this cell and selecting the best one. */
 
-func Consider(data planet_data, dims []int, table []State, there []int, value_difference int, best_value *Value, best_source []int) {
+func Consider(data planet_data, dims LogicalIndex, table []State, there LogicalIndex, value_difference int, best_value *Value, best_source LogicalIndex) {
 	there_value := CellValue(data, dims, table, there)
 	if value_difference < 0 && Value(-value_difference) > there_value {
 		/* Can't afford this transition */
@@ -327,7 +328,7 @@ func Consider(data planet_data, dims []int, table []State, there []int, value_di
 
 var cell_filled_count int
 
-func CellValue(data planet_data, dims []int, table []State, addr []int) Value {
+func CellValue(data planet_data, dims LogicalIndex, table []State, addr LogicalIndex) Value {
 	my_index := EncodeIndex(dims, addr)
 	if table[my_index].value == VALUE_BEING_EVALUATED {
 		panic("Circular dependency")
@@ -338,8 +339,8 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) Value {
 	table[my_index].value = VALUE_BEING_EVALUATED
 
 	best_value := Value(VALUE_RUBISH)
-	best_source := make([]int, NumDimensions)
-	other := make([]int, NumDimensions)
+	best_source := make(LogicalIndex, NumDimensions)
+	other := make(LogicalIndex, NumDimensions)
 	copy(other, addr)
 	planet := data.i2p[addr[Location]]
 
@@ -544,8 +545,8 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) Value {
 	return table[my_index].value
 }
 
-func FinalState(dims []int) []int {
-	addr := make([]int, NumDimensions)
+func FinalState(dims LogicalIndex) LogicalIndex {
+	addr := make(LogicalIndex, NumDimensions)
 	addr[Edens] = *end_edens
 	addr[Cloaks] = dims[Cloaks] - 1
 	addr[BuyFighters] = dims[BuyFighters] - 1
@@ -558,7 +559,7 @@ func FinalState(dims []int) []int {
 	return addr
 }
 
-func FindBestState(data planet_data, dims []int, table []State, addr []int) PhysicalIndex {
+func FindBestState(data planet_data, dims LogicalIndex, table []State, addr LogicalIndex) PhysicalIndex {
 	max_index := PhysicalIndex(-1)
 	max_value := 0.0
 	max_fuel := 1
@@ -598,7 +599,7 @@ func Commas(n Value) (s string) {
 	return
 }
 
-func FighterAndShieldCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
+func FighterAndShieldCost(data planet_data, dims LogicalIndex, table []State, best PhysicalIndex) {
 	if *drones == 0 && *batteries == 0 {
 		return
 	}
@@ -619,7 +620,7 @@ func FighterAndShieldCost(data planet_data, dims []int, table []State, best Phys
 	}
 }
 
-func EndEdensCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
+func EndEdensCost(data planet_data, dims LogicalIndex, table []State, best PhysicalIndex) {
 	if *end_edens == 0 {
 		return
 	}
@@ -635,7 +636,7 @@ func EndEdensCost(data planet_data, dims []int, table []State, best PhysicalInde
 	}
 }
 
-func VisitCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
+func VisitCost(data planet_data, dims LogicalIndex, table []State, best PhysicalIndex) {
 	if dims[Visit] == 1 {
 		return
 	}
@@ -650,7 +651,7 @@ func VisitCost(data planet_data, dims []int, table []State, best PhysicalIndex) 
 	}
 }
 
-func EndLocationCost(data planet_data, dims []int, table []State, best PhysicalIndex) {
+func EndLocationCost(data planet_data, dims LogicalIndex, table []State, best PhysicalIndex) {
 	if len(end()) == 0 {
 		return
 	}
@@ -665,7 +666,7 @@ func EndLocationCost(data planet_data, dims []int, table []State, best PhysicalI
 	*end_string = save_end_string
 }
 
-func DescribePath(data planet_data, dims []int, table []State, start PhysicalIndex) (description []string) {
+func DescribePath(data planet_data, dims LogicalIndex, table []State, start PhysicalIndex) (description []string) {
 	for index := start; table[index].from > FROM_ROOT; index = table[index].from {
 		if table[index].from == FROM_UNINITIALIZED {
 			panic(index)
