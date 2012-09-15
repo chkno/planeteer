@@ -133,13 +133,21 @@ type planet_data struct {
 	i2p, i2c    []string       // Generated; not read from file
 }
 
-func ReadData() (data planet_data) {
-	f, err := os.Open(*planet_data_file)
+func json_slurp(filename string, receptacle interface{}) error {
+	f, err := os.Open(filename)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer f.Close()
-	err = json.NewDecoder(f).Decode(&data)
+	err = json.NewDecoder(f).Decode(receptacle)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReadData() (data planet_data) {
+	err := json_slurp(*planet_data_file, &data)
 	if err != nil {
 		panic(err)
 	}
