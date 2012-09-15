@@ -247,8 +247,11 @@ func StateTableSize(dims []int) int {
 	return product
 }
 
+type Value int32
+type PhysicalIndex int32
+
 type State struct {
-	value int32
+	value Value
 	from  PhysicalIndex
 }
 
@@ -259,8 +262,6 @@ const (
 	VALUE_BEING_EVALUATED
 	VALUE_RUBISH
 )
-
-type PhysicalIndex int32
 
 func EncodeIndex(dims, addr []int) PhysicalIndex {
 	index := addr[0]
@@ -302,7 +303,7 @@ func CreateStateTable(data planet_data, dims []int) []State {
 		addr[Hold] = data.c2i[*start_hold]
 	}
 	start_index := EncodeIndex(dims, addr)
-	table[start_index].value = int32(*funds)
+	table[start_index].value = Value(*funds)
 	table[start_index].from = FROM_ROOT
 
 	return table
@@ -311,13 +312,13 @@ func CreateStateTable(data planet_data, dims []int) []State {
 /* CellValue fills in the one cell at address addr by looking at all
  * the possible ways to reach this cell and selecting the best one. */
 
-func Consider(data planet_data, dims []int, table []State, there []int, value_difference int, best_value *int32, best_source []int) {
+func Consider(data planet_data, dims []int, table []State, there []int, value_difference int, best_value *Value, best_source []int) {
 	there_value := CellValue(data, dims, table, there)
-	if value_difference < 0 && int32(-value_difference) > there_value {
+	if value_difference < 0 && Value(-value_difference) > there_value {
 		/* Can't afford this transition */
 		return
 	}
-	possible_value := there_value + int32(value_difference)
+	possible_value := there_value + Value(value_difference)
 	if possible_value > *best_value {
 		*best_value = possible_value
 		copy(best_source, there)
@@ -326,7 +327,7 @@ func Consider(data planet_data, dims []int, table []State, there []int, value_di
 
 var cell_filled_count int
 
-func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
+func CellValue(data planet_data, dims []int, table []State, addr []int) Value {
 	my_index := EncodeIndex(dims, addr)
 	if table[my_index].value == VALUE_BEING_EVALUATED {
 		panic("Circular dependency")
@@ -336,7 +337,7 @@ func CellValue(data planet_data, dims []int, table []State, addr []int) int32 {
 	}
 	table[my_index].value = VALUE_BEING_EVALUATED
 
-	best_value := int32(VALUE_RUBISH)
+	best_value := Value(VALUE_RUBISH)
 	best_source := make([]int, NumDimensions)
 	other := make([]int, NumDimensions)
 	copy(other, addr)
@@ -582,7 +583,7 @@ func FindBestState(data planet_data, dims []int, table []State, addr []int) Phys
 	return max_index
 }
 
-func Commas(n int32) (s string) {
+func Commas(n Value) (s string) {
 	if n < 0 {
 		panic(n)
 	}
@@ -630,7 +631,7 @@ func EndEdensCost(data planet_data, dims []int, table []State, best PhysicalInde
 		extra_funds := table[alt_best].value - table[best].value
 		fmt.Println("\rUse", extra_edens, "extra edens, make an extra",
 			Commas(extra_funds), "(",
-			Commas(extra_funds/int32(extra_edens)), "per eden)")
+			Commas(extra_funds/Value(extra_edens)), "per eden)")
 	}
 }
 

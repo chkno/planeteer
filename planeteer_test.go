@@ -19,7 +19,7 @@ func TestEncodeDecode(t *testing.T) {
 }
 
 func TestCommas(t *testing.T) {
-	cases := map[int32]string{
+	cases := map[Value]string{
 		1: "1",
 		10: "10",
 		100: "100",
