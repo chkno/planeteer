@@ -807,7 +807,7 @@ func main() {
 	best := FindBestState(data, dims, table, final_state)
 	print("\n")
 	if best == -1 {
-		print("Cannot acheive success criteria\n")
+		print("Cannot achieve success criteria\n")
 		return
 	}
 	description := DescribePath(data, dims, table, best)
