@@ -633,14 +633,14 @@ func FighterAndShieldCost(data planet_data, dims LogicalIndex, table []State, be
 		final_state[BuyFighters] = 0
 		alt_best := FindBestState(data, dims, table, final_state)
 		cost := table[alt_best].value - table[best].value
-		fmt.Println("\rDrones were", float64(cost)/float64(*drones), "each")
+		fmt.Printf("\rDrones were %.2f each\n", float64(cost)/float64(*drones))
 	}
 	if *batteries > 0 {
 		final_state := FinalState(dims)
 		final_state[BuyShields] = 0
 		alt_best := FindBestState(data, dims, table, final_state)
 		cost := table[alt_best].value - table[best].value
-		fmt.Println("\rBatteries were", float64(cost)/float64(*batteries), "each")
+		fmt.Printf("\rBatteries were %.2f each\n", float64(cost)/float64(*batteries))
 	}
 }
 
