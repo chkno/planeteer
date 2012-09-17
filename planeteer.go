@@ -297,6 +297,22 @@ func DecodeIndex(dims LogicalIndex, index PhysicalIndex) LogicalIndex {
 	return addr
 }
 
+func PlanetIndex(data planet_data, name string) int {
+	index, ok := data.p2i[name]
+	if !ok {
+		panic("Unknown planet " + name)
+	}
+	return index
+}
+
+func CommodityIndex(data planet_data, name string) int {
+	index, ok := data.c2i[name]
+	if !ok {
+		panic("Unknown commodity " + name)
+	}
+	return index
+}
+
 func CreateStateTable(data planet_data, dims LogicalIndex) []State {
 	table := make([]State, StateTableSize(dims))
 	for i := range table {
@@ -307,9 +323,9 @@ func CreateStateTable(data planet_data, dims LogicalIndex) []State {
 	addr := make(LogicalIndex, NumDimensions)
 	addr[Fuel] = *fuel
 	addr[Edens] = *start_edens
-	addr[Location] = data.p2i[*start]
+	addr[Location] = PlanetIndex(data, *start)
 	if *start_hold != "" {
-		addr[Hold] = data.c2i[*start_hold]
+		addr[Hold] = CommodityIndex(data,*start_hold)
 	}
 	start_index := EncodeIndex(dims, addr)
 	table[start_index].value = Value(*funds)
@@ -360,7 +376,7 @@ func CellValue(data planet_data, dims LogicalIndex, table []State, addr LogicalI
 		if addr[Fuel]+2 < dims[Fuel] {
 			other[Fuel] = addr[Fuel] + 2
 			hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 2)
-			if hole_index >= len(flight_plan()) || addr[Location] != data.p2i[flight_plan()[hole_index]] {
+			if hole_index >= len(flight_plan()) || addr[Location] != PlanetIndex(data, flight_plan()[hole_index]) {
 				for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
 					if data.Planets[data.i2p[addr[Location]]].BeaconOn {
 						Consider(data, dims, table, other, 0, &best_value, best_source)
@@ -374,7 +390,7 @@ func CellValue(data planet_data, dims LogicalIndex, table []State, addr LogicalI
 		/* Travel here via a 1-fuel unit jump (a hyper hole) */
 		if addr[Fuel]+1 < dims[Fuel] {
 			hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 1)
-			if hole_index < len(flight_plan()) && addr[Location] == data.p2i[flight_plan()[hole_index]] {
+			if hole_index < len(flight_plan()) && addr[Location] == PlanetIndex(data, flight_plan()[hole_index]) {
 				other[Fuel] = addr[Fuel] + 1
 				for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
 					Consider(data, dims, table, other, 0, &best_value, best_source)
