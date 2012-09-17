@@ -373,14 +373,12 @@ func CellValue(data planet_data, dims LogicalIndex, table []State, addr LogicalI
 		other[Traded] = 1 /* Travel from states that have done trading. */
 
 		/* Travel here via a 2-fuel unit jump */
-		if addr[Fuel]+2 < dims[Fuel] {
+		if data.Planets[data.i2p[addr[Location]]].BeaconOn && addr[Fuel]+2 < dims[Fuel] {
 			other[Fuel] = addr[Fuel] + 2
 			hole_index := (dims[Fuel] - 1) - (addr[Fuel] + 2)
 			if hole_index >= len(flight_plan()) || addr[Location] != PlanetIndex(data, flight_plan()[hole_index]) {
 				for other[Location] = 0; other[Location] < dims[Location]; other[Location]++ {
-					if data.Planets[data.i2p[addr[Location]]].BeaconOn {
-						Consider(data, dims, table, other, 0, &best_value, best_source)
-					}
+					Consider(data, dims, table, other, 0, &best_value, best_source)
 				}
 			}
 			other[Location] = addr[Location]
