@@ -193,7 +193,7 @@ func ReadData() (data planet_data) {
  *    * Reduce the size of the Edens dimension from 3 to 2, for the
  *      same reasons as Fuel above.  33% savings.
  *    * Buy more ram.  (Just sayin'.  It's cheaper than you think.)
- *      
+ *
  */
 
 // The official list of dimensions:
@@ -325,7 +325,7 @@ func CreateStateTable(data planet_data, dims LogicalIndex) []State {
 	addr[Edens] = *start_edens
 	addr[Location] = PlanetIndex(data, *start)
 	if *start_hold != "" {
-		addr[Hold] = CommodityIndex(data,*start_hold)
+		addr[Hold] = CommodityIndex(data, *start_hold)
 	}
 	start_index := EncodeIndex(dims, addr)
 	table[start_index].value = Value(*funds)
