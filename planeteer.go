@@ -146,12 +146,13 @@ func json_slurp(filename string, receptacle interface{}) error {
 	return nil
 }
 
-func ReadData() (data planet_data) {
+func ReadData() planet_data {
+	var data planet_data
 	err := json_slurp(*planet_data_file, &data)
 	if err != nil {
 		panic(err)
 	}
-	return
+	return data
 }
 
 /* This program operates by filling in a state table representing the best
@@ -606,7 +607,8 @@ func FindBestState(data planet_data, dims LogicalIndex, table []State, addr Logi
 	return max_index
 }
 
-func Commas(n Value) (s string) {
+func Commas(n Value) string {
+	var s string
 	if n < 0 {
 		panic(n)
 	}
@@ -618,7 +620,7 @@ func Commas(n Value) (s string) {
 		n /= 1000
 	}
 	s = fmt.Sprint(r) + s
-	return
+	return s
 }
 
 func FighterAndShieldCost(data planet_data, dims LogicalIndex, table []State, best PhysicalIndex) {
@@ -688,7 +690,8 @@ func EndLocationCost(data planet_data, dims LogicalIndex, table []State, best Ph
 	*end_string = save_end_string
 }
 
-func DescribePath(data planet_data, dims LogicalIndex, table []State, start PhysicalIndex) (description []string) {
+func DescribePath(data planet_data, dims LogicalIndex, table []State, start PhysicalIndex) []string {
+	var description []string
 	for index := start; table[index].from > FROM_ROOT; index = table[index].from {
 		if table[index].from == FROM_UNINITIALIZED {
 			panic(index)
@@ -745,7 +748,7 @@ func DescribePath(data planet_data, dims LogicalIndex, table []State, start Phys
 		}
 		description = append(description, fmt.Sprintf("%13v ", Commas(table[index].value))+line)
 	}
-	return
+	return description
 }
 
 // (Example of a use case for generics in Go)
